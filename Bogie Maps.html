@@ -1,0 +1,589 @@
+
+<!DOCTYPE html>
+<html lang="lo">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title id="page-title">Bogie Maps - ระบบนำทางอัจฉริยะ</title>
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Leaflet CSS & JS -->
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+    <!-- Leaflet Routing Machine CSS & JS -->
+    <link rel="stylesheet" href="https://unpkg.com/leaflet-routing-machine@3.2.12/dist/leaflet-routing-machine.css" />
+    <script src="https://unpkg.com/leaflet-routing-machine@3.2.12/dist/leaflet-routing-machine.min.js"></script>
+    <!-- FontAwesome Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Kanit:wght@300;400;500;600;700&family=Noto+Sans+Lao:wght@300;400;600;700&display=swap" rel="stylesheet">
+    <style>
+        body { 
+            font-family: 'Kanit', 'Noto Sans Lao', sans-serif; 
+            -webkit-user-select: none;
+            user-select: none;
+            overscroll-behavior: none;
+        }
+        .white-card {
+            background: rgba(255, 255, 255, 0.98);
+            backdrop-filter: blur(12px);
+            border: 1px solid rgba(229, 231, 235, 1);
+            box-shadow: 0 4px 20px -2px rgba(0, 0, 0, 0.05);
+        }
+        .flag-icon {
+            width: 22px;
+            height: 22px;
+            border-radius: 50%;
+            object-fit: cover;
+            border: 1px solid rgba(0,0,0,0.15);
+            box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+        }
+        .map-container-large {
+            height: 52vh;
+            min-height: 320px;
+        }
+        #map { height: 100%; width: 100%; border-radius: 1rem; z-index: 10; }
+        .leaflet-control-attribution { display: none !important; }
+        .leaflet-routing-container { display: none !important; }
+        ::-webkit-scrollbar { width: 4px; height: 4px; }
+        ::-webkit-scrollbar-track { background: #f1f5f9; }
+        ::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 4px; }
+    </style>
+</head>
+<body class="bg-gray-100 text-gray-800 h-screen flex flex-col overflow-hidden">
+
+    <!-- Top Header -->
+    <header class="bg-white border-b border-gray-200 px-3 py-2 flex items-center justify-between z-30 shadow-xs shrink-0">
+        <div class="flex items-center space-x-2">
+            <!-- Custom Image Logo -->
+            <img src="https://i.postimg.cc/brMTXmjN/6732C3AC-E5C4-4568-B02F-84985799FE09.png" alt="Logo" class="w-9 h-9 object-contain shrink-0 drop-shadow-xs">
+            <div>
+                <h1 id="lbl-brand" class="font-bold text-sm text-gray-900 tracking-wide">Bogie Maps</h1>
+                <p id="lbl-subtitle" class="text-[10px] text-gray-500">ລະບົບນຳທາງອັດສະລິຍະຕາມເສັ້ນທາງຕົວຈິງ</p>
+            </div>
+        </div>
+
+        <!-- Right Controls: Custom Flag Selector & Reset -->
+        <div class="flex items-center space-x-2 relative">
+            
+            <!-- Custom Flag Dropdown Trigger -->
+            <div class="relative">
+                <button onclick="toggleLangMenu()" id="current-lang-btn" class="flex items-center space-x-1.5 bg-gray-50 hover:bg-gray-100 border border-gray-200 px-2.5 py-1.5 rounded-xl text-xs font-medium transition shadow-2xs">
+                    <img id="current-flag" src="https://flagcdn.com/w40/la.png" class="flag-icon" alt="Flag">
+                    <span id="current-lang-name">ລາວ</span>
+                    <i class="fa-solid fa-chevron-down text-[10px] text-gray-400 ml-0.5"></i>
+                </button>
+
+                <!-- Dropdown Menu -->
+                <div id="lang-menu" class="hidden absolute right-0 mt-2 w-40 bg-white border border-gray-200 rounded-2xl shadow-xl py-1.5 z-50">
+                    <button onclick="changeLanguage('lo', 'ລາວ', 'la')" class="w-full px-3 py-2 text-left flex items-center space-x-2.5 hover:bg-gray-50 text-xs font-medium">
+                        <img src="https://flagcdn.com/w40/la.png" class="flag-icon" alt="Lao">
+                        <span>ລາວ (Laos)</span>
+                    </button>
+                    <button onclick="changeLanguage('th', 'ไทย', 'th')" class="w-full px-3 py-2 text-left flex items-center space-x-2.5 hover:bg-gray-50 text-xs font-medium">
+                        <img src="https://flagcdn.com/w40/th.png" class="flag-icon" alt="Thai">
+                        <span>ไทย (Thailand)</span>
+                    </button>
+                    <button onclick="changeLanguage('en', 'English', 'gb')" class="w-full px-3 py-2 text-left flex items-center space-x-2.5 hover:bg-gray-50 text-xs font-medium">
+                        <img src="https://flagcdn.com/w40/gb.png" class="flag-icon" alt="English">
+                        <span>English</span>
+                    </button>
+                    <!-- เปลี่ยนลิงก์ธงจีนเป็นลิงก์ใหม่ที่คุณต้องการเรียบร้อย -->
+                    <button onclick="changeLanguage('zh', '中文', 'https://i.postimg.cc/KvWZVB3j/photo-output.png', true)" class="w-full px-3 py-2 text-left flex items-center space-x-2.5 hover:bg-gray-50 text-xs font-medium">
+                        <img src="https://i.postimg.cc/KvWZVB3j/photo-output.png" class="flag-icon" alt="Chinese">
+                        <span>中文 (Chinese)</span>
+                    </button>
+                    <button onclick="changeLanguage('vi', 'Tiếng Việt', 'vn')" class="w-full px-3 py-2 text-left flex items-center space-x-2.5 hover:bg-gray-50 text-xs font-medium">
+                        <img src="https://flagcdn.com/w40/vn.png" class="flag-icon" alt="Vietnamese">
+                        <span>Tiếng Việt</span>
+                    </button>
+                    <button onclick="changeLanguage('ja', '日本語', 'jp')" class="w-full px-3 py-2 text-left flex items-center space-x-2.5 hover:bg-gray-50 text-xs font-medium">
+                        <img src="https://flagcdn.com/w40/jp.png" class="flag-icon" alt="Japanese">
+                        <span>日本語 (Japanese)</span>
+                    </button>
+                </div>
+            </div>
+
+            <!-- Reset Button -->
+            <button onclick="resetAll()" class="bg-gray-100 hover:bg-gray-200 text-gray-700 w-9 h-9 rounded-xl text-sm transition border border-gray-200 active:scale-95 flex items-center justify-center shrink-0 shadow-2xs" title="รีเซ็ต">
+                <i class="fa-solid fa-rotate-right"></i>
+            </button>
+        </div>
+    </header>
+
+    <!-- Main Content Layout -->
+    <div class="flex-1 flex flex-col p-2.5 gap-2 overflow-y-auto bg-gray-100">
+        
+        <!-- Map Container -->
+        <div class="w-full map-container-large white-card p-1.5 rounded-2xl relative overflow-hidden bg-white shrink-0">
+            <div id="map"></div>
+
+            <!-- Custom Map Type Switcher Button -->
+            <div class="absolute top-3 right-3 z-[400]">
+                <button onclick="toggleMapLayer()" id="map-layer-btn" class="bg-white/95 hover:bg-white text-gray-800 font-medium px-3 py-1.5 rounded-xl shadow-md border border-gray-200 text-xs flex items-center space-x-1.5 transition active:scale-95 backdrop-blur-md">
+                    <i id="layer-icon" class="fa-solid fa-satellite text-blue-600"></i>
+                    <span id="lbl-layer-toggle">ດາວທຽມ</span>
+                </button>
+            </div>
+
+            <!-- Watermark Developer Tag -->
+            <div class="absolute bottom-2 left-1/2 -translate-x-1/2 z-[400] pointer-events-none bg-white/85 backdrop-blur-xs px-2.5 py-0.5 rounded-md border border-gray-200/50 shadow-2xs flex items-center space-x-1 text-[10px] text-gray-500">
+                <i class="fa-regular fa-copyright text-[9px]"></i>
+                <span>Bogie Maps by Vathsana</span>
+            </div>
+        </div>
+
+        <!-- Controls & Dashboard Combined Panel -->
+        <div class="w-full shrink-0 flex flex-col gap-2 z-10 pb-2">
+            
+            <div class="white-card p-3 rounded-2xl flex flex-col gap-2 shadow-md">
+                
+                <!-- 1. Route Result Section -->
+                <div id="result-card" class="flex flex-col gap-1.5 pb-2 border-b border-gray-100">
+                    <div class="flex items-center justify-between">
+                        <span class="text-xs font-bold text-emerald-600 flex items-center space-x-1.5">
+                            <i class="fa-solid fa-route"></i>
+                            <span id="lbl-result-title">ສະຫຼຸບຜົນການນຳທາງຕາມເສັ້ນທາງຕົວຈິງ</span>
+                        </span>
+                        <span class="bg-emerald-50 text-emerald-700 text-[10px] px-2 py-0.5 rounded-full font-bold border border-emerald-200 shrink-0">
+                            <i class="fa-solid fa-bolt mr-1"></i> <span id="lbl-fastest">แม่ນຍຳທີ່ສຸດ</span>
+                        </span>
+                    </div>
+
+                    <div class="grid grid-cols-3 gap-2 text-center">
+                        <div class="bg-gray-50 p-2 rounded-xl border border-gray-200">
+                            <span id="lbl-dist-title" class="text-gray-400 text-[10px] block">ໄລຍະທາງ</span>
+                            <span id="txt-distance" class="text-xs sm:text-sm font-bold text-gray-800">0 <span class="dist-unit">ກມ.</span></span>
+                        </div>
+                        <div class="bg-gray-50 p-2 rounded-xl border border-gray-200">
+                            <span id="lbl-time-title" class="text-gray-400 text-[10px] block">ເວລາເດີນທາງ</span>
+                            <span id="txt-duration" class="text-xs sm:text-sm font-bold text-emerald-600">0 <span class="time-unit">ນາທີ</span></span>
+                        </div>
+                        <div class="bg-gray-50 p-2 rounded-xl border border-gray-200">
+                            <span id="lbl-arrive-title" class="text-gray-400 text-[10px] block">ເຖິງປະມານ</span>
+                            <span id="txt-arrival" class="text-xs sm:text-sm font-semibold text-gray-800">-</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 2. Vehicle Selector Section -->
+                <div>
+                    <div class="flex items-center justify-between mb-1.5">
+                        <span class="text-xs font-bold text-gray-700 uppercase tracking-wider flex items-center space-x-1.5">
+                            <i class="fa-solid fa-sliders text-blue-600"></i>
+                            <span id="lbl-vehicle-title">ເລືອກປະເພດການເດີນທາງ</span>
+                        </span>
+                        <span id="lbl-instruction" class="text-[10px] text-gray-400">ຄລິກເທິງແຜນທີ່ເພື່ອປັກໝຸດ</span>
+                    </div>
+
+                    <div class="grid grid-cols-4 gap-2">
+                        <button onclick="setVehicle('car')" id="btn-car" class="vehicle-btn flex flex-col items-center justify-center p-2 rounded-xl border-2 border-blue-600 bg-blue-50 text-blue-600 transition active:scale-95">
+                            <i class="fa-solid fa-car text-base mb-1"></i>
+                            <span id="lbl-car" class="text-[11px] font-semibold truncate w-full text-center">ລົດยนต์</span>
+                        </button>
+                        <button onclick="setVehicle('moto')" id="btn-moto" class="vehicle-btn flex flex-col items-center justify-center p-2 rounded-xl border-2 border-gray-200 bg-white text-gray-500 hover:border-gray-300 transition active:scale-95">
+                            <i class="fa-solid fa-motorcycle text-base mb-1"></i>
+                            <span id="lbl-moto" class="text-[11px] font-semibold truncate w-full text-center">ລົດຈັກ</span>
+                        </button>
+                        <button onclick="setVehicle('bicycle')" id="btn-bicycle" class="vehicle-btn flex flex-col items-center justify-center p-2 rounded-xl border-2 border-gray-200 bg-white text-gray-500 hover:border-gray-300 transition active:scale-95">
+                            <i class="fa-solid fa-bicycle text-base mb-1"></i>
+                            <span id="lbl-bicycle" class="text-[11px] font-semibold truncate w-full text-center">ລົດຖີບ</span>
+                        </button>
+                        <button onclick="setVehicle('walk')" id="btn-walk" class="vehicle-btn flex flex-col items-center justify-center p-2 rounded-xl border-2 border-gray-200 bg-white text-gray-500 hover:border-gray-300 transition active:scale-95">
+                            <i class="fa-solid fa-person-walking text-base mb-1"></i>
+                            <span id="lbl-walk" class="text-[11px] font-semibold truncate w-full text-center">ຍ່າງ/ແລ່ນ</span>
+                        </button>
+                    </div>
+                </div>
+
+            </div>
+
+        </div>
+
+    </div>
+
+    <!-- Script -->
+    <script>
+        let map;
+        let userMarker = null;
+        let destMarker = null;
+        let routingControl = null;
+        let userCoords = null;
+        let destCoords = null;
+        let currentVehicle = 'car';
+        let currentLang = 'lo';
+        let isSatellite = false;
+
+        const translations = {
+            lo: {
+                brand: "Bogie Maps",
+                subtitle: "ລະບົບນຳທາງອັດສະລິຍະຕາມເສັ້ນທາງຕົວຈິງ",
+                vehicleTitle: "ເລືອກປະເພດການເດີນທາງ",
+                instruction: "ຄລິກເທິງແຜນທີ່ເພື່ອປັກໝຸດ",
+                car: "ລົດยนต์",
+                moto: "ລົດຈັກ",
+                bicycle: "ລົດຖີບ",
+                walk: "ຍ່າງ/ແລ່ນ",
+                resultTitle: "ສະຫຼຸບຜົນການນຳທາງຕາມເສັ້ນທາງຕົວຈິງ",
+                fastest: "แม่ນຍຳທີ່ສຸດ",
+                distTitle: "ໄລຍະທາງ",
+                timeTitle: "ເວລາເດີນທາງ",
+                arriveTitle: "ເຖິງປະມານ",
+                layerSat: "ດາວທຽມ",
+                layerRoad: "ແຜນທີ່ຖະໜົນ",
+                distUnit: "ກມ.",
+                minUnit: "ນາທີ",
+                hourUnit: "ຊົ່ວໂມງ"
+            },
+            th: {
+                brand: "Bogie Maps",
+                subtitle: "ระบบนำทางอัจฉริยะตามถนนจริง",
+                vehicleTitle: "เลือกรูปแบบการเดินทาง",
+                instruction: "คลิกบนแผนที่เพื่อปักหมุด",
+                car: "รถยนต์",
+                moto: "มอเตอร์ไซค์",
+                bicycle: "จักรยาน",
+                walk: "เดิน/วิ่ง",
+                resultTitle: "สรุปผลการนำทางตามถนนจริง",
+                fastest: "เร็วที่สุด",
+                distTitle: "ระยะทาง",
+                timeTitle: "เวลาเดินทาง",
+                arriveTitle: "ถึงประมาณ",
+                layerSat: "ดาวเทียม",
+                layerRoad: "แผนที่ถนน",
+                distUnit: "กม.",
+                minUnit: "นาที",
+                hourUnit: "ชั่วโมง"
+            },
+            en: {
+                brand: "Bogie Maps",
+                subtitle: "Smart Navigation Pro",
+                vehicleTitle: "Select Travel Mode",
+                instruction: "Click on map to set destination",
+                car: "Car",
+                moto: "Moto",
+                bicycle: "Bicycle",
+                walk: "Walking",
+                resultTitle: "Route Summary",
+                fastest: "Fastest",
+                distTitle: "Distance",
+                timeTitle: "Duration",
+                arriveTitle: "Est. Arrival",
+                layerSat: "Satellite",
+                layerRoad: "Street",
+                distUnit: "km",
+                minUnit: "mins",
+                hourUnit: "hours"
+            },
+            zh: {
+                brand: "Bogie Maps",
+                subtitle: "智能导航系统",
+                vehicleTitle: "选择出行方式",
+                instruction: "点击地图设置目的地",
+                car: "汽车",
+                moto: "摩托车",
+                bicycle: "自行车",
+                walk: "步行",
+                resultTitle: "路线总结",
+                fastest: "最快",
+                distTitle: "距离",
+                timeTitle: "耗时",
+                arriveTitle: "预计到达",
+                layerSat: "卫星地图",
+                layerRoad: "街道地图",
+                distUnit: "公里",
+                minUnit: "分钟",
+                hourUnit: "小时"
+            },
+            vi: {
+                brand: "Bogie Maps",
+                subtitle: "Hệ thống định vị thông minh",
+                vehicleTitle: "Chọn phương tiện",
+                instruction: "Nhấp vào bản đồ để chọn điểm đến",
+                car: "Ô tô",
+                moto: "Xe máy",
+                bicycle: "Xe đạp",
+                walk: "Đi bộ",
+                resultTitle: "Tóm tắt lộ trình",
+                fastest: "Nhanh nhất",
+                distTitle: "Khoảng cách",
+                timeTitle: "Thời gian",
+                arriveTitle: "Dự kiến đến",
+                layerSat: "Vệ tinh",
+                layerRoad: "Đường phố",
+                distUnit: "km",
+                minUnit: "phút",
+                hourUnit: "giờ"
+            },
+            ja: {
+                brand: "Bogie Maps",
+                subtitle: "スマートナビゲーション",
+                vehicleTitle: "移動手段を選択",
+                instruction: "地図をクリックして目的地を設定",
+                car: "車",
+                moto: "バイク",
+                bicycle: "自転車",
+                walk: "徒歩",
+                resultTitle: "ルート概要",
+                fastest: "最速",
+                distTitle: "距離",
+                timeTitle: "所要時間",
+                arriveTitle: "到着予定",
+                layerSat: "衛星写真",
+                layerRoad: "道路地図",
+                distUnit: "km",
+                minUnit: "分",
+                hourUnit: "時間"
+            }
+        };
+
+        let streetLayer, satelliteLayer;
+
+        function initMap() {
+            map = L.map('map', { 
+                zoomControl: false, 
+                dragging: true,
+                tap: true,
+                touchZoom: true,
+                scrollWheelZoom: true,
+                doubleClickZoom: true
+            }).setView([17.9757, 102.6331], 14);
+
+            streetLayer = L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', { maxZoom: 19 });
+            satelliteLayer = L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}', { maxZoom: 19 });
+
+            streetLayer.addTo(map);
+
+            map.on('click', function(e) {
+                setDestination(e.latlng.lat, e.latlng.lng);
+            });
+
+            changeLanguage('lo', 'ລາວ', 'la');
+            fetchAutoGPS();
+        }
+
+        function toggleMapLayer() {
+            const t = translations[currentLang];
+            if (isSatellite) {
+                map.removeLayer(satelliteLayer);
+                streetLayer.addTo(map);
+                isSatellite = false;
+                document.getElementById('layer-icon').className = "fa-solid fa-satellite text-blue-600";
+                document.getElementById('lbl-layer-toggle').innerText = t.layerSat;
+            } else {
+                map.removeLayer(streetLayer);
+                satelliteLayer.addTo(map);
+                isSatellite = true;
+                document.getElementById('layer-icon').className = "fa-solid fa-map text-emerald-600";
+                document.getElementById('lbl-layer-toggle').innerText = t.layerRoad;
+            }
+        }
+
+        function toggleLangMenu() {
+            const menu = document.getElementById('lang-menu');
+            menu.classList.toggle('hidden');
+        }
+
+        window.addEventListener('click', function(e) {
+            if (!document.getElementById('current-lang-btn').contains(e.target) && !document.getElementById('lang-menu').contains(e.target)) {
+                document.getElementById('lang-menu').classList.add('hidden');
+            }
+        });
+
+        function changeLanguage(lang, name, flagArg, isCustomUrl = false) {
+            currentLang = lang;
+            const t = translations[lang];
+
+            if(name && flagArg) {
+                document.getElementById('current-lang-name').innerText = name;
+                document.getElementById('current-flag').src = isCustomUrl ? flagArg : `https://flagcdn.com/w40/${flagArg}.png`;
+            }
+            document.getElementById('lang-menu').classList.add('hidden');
+
+            document.getElementById('lbl-brand').innerText = t.brand;
+            document.getElementById('lbl-subtitle').innerText = t.subtitle;
+            document.getElementById('lbl-vehicle-title').innerText = t.vehicleTitle;
+            document.getElementById('lbl-instruction').innerText = t.instruction;
+            document.getElementById('lbl-car').innerText = t.car;
+            document.getElementById('lbl-moto').innerText = t.moto;
+            document.getElementById('lbl-bicycle').innerText = t.bicycle;
+            document.getElementById('lbl-walk').innerText = t.walk;
+            document.getElementById('lbl-result-title').innerText = t.resultTitle;
+            document.getElementById('lbl-fastest').innerText = t.fastest;
+            document.getElementById('lbl-dist-title').innerText = t.distTitle;
+            document.getElementById('lbl-time-title').innerText = t.timeTitle;
+            document.getElementById('lbl-arrive-title').innerText = t.arriveTitle;
+            document.getElementById('lbl-layer-toggle').innerText = isSatellite ? t.layerRoad : t.layerSat;
+
+            document.querySelectorAll('.dist-unit').forEach(el => el.innerText = t.distUnit);
+            
+            if (window.lastTotalMinutes !== undefined) {
+                updateDurationDisplay(window.lastTotalMinutes);
+            } else {
+                document.querySelectorAll('.time-unit').forEach(el => el.innerText = t.minUnit);
+            }
+        }
+
+        const vehicleSpeeds = { car: 45, moto: 50, bicycle: 18, walk: 5 };
+
+        function fetchAutoGPS() {
+            if (navigator.geolocation) {
+                navigator.geolocation.getCurrentPosition(
+                    (position) => {
+                        const lat = position.coords.latitude;
+                        const lng = position.coords.longitude;
+                        userCoords = [lat, lng];
+
+                        if (!userMarker) {
+                            const userIcon = L.divIcon({
+                                className: 'custom-user-marker',
+                                html: `<div class="w-7 h-7 bg-blue-600 rounded-full border-4 border-white shadow-lg animate-pulse flex items-center justify-center"><div class="w-2.5 h-2.5 bg-white rounded-full"></div></div>`,
+                                iconSize: [28, 28],
+                                iconAnchor: [14, 14]
+                            });
+                            userMarker = L.marker(userCoords, { icon: userIcon }).addTo(map);
+                        } else {
+                            userMarker.setLatLng(userCoords);
+                        }
+
+                        map.setView(userCoords, 16, { animate: false });
+
+                        if (destCoords) {
+                            calculateRoute();
+                        }
+                    },
+                    (error) => {
+                        if (!userCoords) {
+                            userCoords = [17.9715, 102.6133]; 
+                            userMarker = L.marker(userCoords).addTo(map);
+                            map.setView(userCoords, 15);
+                        }
+                    },
+                    { enableHighAccuracy: true, timeout: 5000, maximumAge: 0 }
+                );
+            }
+        }
+
+        function setDestination(lat, lng) {
+            destCoords = [lat, lng];
+
+            if (!destMarker) {
+                const destIcon = L.divIcon({
+                    className: 'custom-dest-marker',
+                    html: `<div class="w-8 h-8 bg-red-500 rounded-full border-2 border-white shadow-xl flex items-center justify-center text-white"><i class="fa-solid fa-location-dot"></i></div>`,
+                    iconSize: [32, 32],
+                    iconAnchor: [16, 32]
+                });
+                destMarker = L.marker(destCoords, { icon: destIcon, draggable: true }).addTo(map);
+                
+                destMarker.on('dragend', function(event) {
+                    const pos = event.target.getLatLng();
+                    destCoords = [pos.lat, pos.lng];
+                    calculateRoute();
+                });
+            } else {
+                destMarker.setLatLng(destCoords);
+            }
+
+            calculateRoute();
+        }
+
+        function setVehicle(type) {
+            currentVehicle = type;
+            document.querySelectorAll('.vehicle-btn').forEach(btn => {
+                btn.classList.remove('border-blue-600', 'bg-blue-50', 'text-blue-600');
+                btn.classList.add('border-gray-200', 'bg-white', 'text-gray-500');
+            });
+            const activeBtn = document.getElementById(`btn-${type}`);
+            activeBtn.classList.remove('border-gray-200', 'bg-white', 'text-gray-500');
+            activeBtn.classList.add('border-blue-600', 'bg-blue-50', 'text-blue-600');
+
+            if (userCoords && destCoords) {
+                calculateRoute();
+            }
+        }
+
+        function updateDurationDisplay(totalMinutes) {
+            window.lastTotalMinutes = totalMinutes;
+            const t = translations[currentLang];
+            const durationEl = document.getElementById('txt-duration');
+
+            if (totalMinutes === 0) {
+                durationEl.innerHTML = `0 <span class="time-unit">${t.minUnit}</span>`;
+                return;
+            }
+
+            if (totalMinutes < 60) {
+                durationEl.innerHTML = `${totalMinutes} <span class="time-unit">${t.minUnit}</span>`;
+            } else {
+                const hours = Math.floor(totalMinutes / 60);
+                const minutes = totalMinutes % 60;
+                durationEl.innerHTML = `${hours} <span class="time-unit">${t.hourUnit}</span> ${minutes} <span class="time-unit">${t.minUnit}</span>`;
+            }
+        }
+
+        function calculateRoute() {
+            if (!userCoords || !destCoords) return;
+
+            if (routingControl) {
+                map.removeControl(routingControl);
+            }
+
+            routingControl = L.Routing.control({
+                waypoints: [
+                    L.latLng(userCoords[0], userCoords[1]),
+                    L.latLng(destCoords[0], destCoords[1])
+                ],
+                routeWhileDragging: false,
+                addWaypoints: false,
+                createMarker: function() { return null; },
+                lineOptions: {
+                    styles: [{ color: '#1a73e8', weight: 6, opacity: 0.9 }]
+                }
+            }).addTo(map);
+
+            routingControl.on('routesfound', function(e) {
+                const routes = e.routes;
+                if (routes && routes.length > 0) {
+                    const route = routes[0];
+                    const distanceKm = (route.summary.totalDistance / 1000);
+                    
+                    const speed = vehicleSpeeds[currentVehicle];
+                    const timeInHours = distanceKm / speed;
+                    const timeInMinutes = Math.round(timeInHours * 60);
+
+                    const t = translations[currentLang];
+                    updateDurationDisplay(timeInMinutes);
+
+                    const now = new Date();
+                    now.setMinutes(now.getMinutes() + timeInMinutes);
+                    const arrivalTimeStr = now.toLocaleTimeString('th-TH', { hour: '2-digit', minute: '2-digit' });
+
+                    document.getElementById('txt-distance').innerHTML = `${distanceKm.toFixed(1)} <span class="dist-unit">${t.distUnit}</span>`;
+                    document.getElementById('txt-arrival').innerText = arrivalTimeStr;
+                }
+            });
+        }
+
+        function resetAll() {
+            if (destMarker) {
+                map.removeLayer(destMarker);
+                destMarker = null;
+            }
+            if (routingControl) {
+                map.removeControl(routingControl);
+                routingControl = null;
+            }
+            destCoords = null;
+            window.lastTotalMinutes = 0;
+            const t = translations[currentLang];
+            document.getElementById('txt-distance').innerHTML = `0 <span class="dist-unit">${t.distUnit}</span>`;
+            updateDurationDisplay(0);
+            document.getElementById('txt-arrival').innerText = '-';
+            fetchAutoGPS();
+        }
+
+        window.onload = initMap;
+    </script>
+</body>
+</html>
