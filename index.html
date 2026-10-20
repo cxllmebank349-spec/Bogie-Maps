@@ -142,10 +142,10 @@
         </div>
     </header>
 
-    <!-- Main Content Layout (Scrollable with top margin to avoid header overlap) -->
+    <!-- Main Content Layout -->
     <div class="flex-1 flex flex-col p-2.5 gap-2 bg-gray-100 mt-[55px] mb-4">
         
-        <!-- Search Bar Section with Suggestions Dropdown -->
+        <!-- Search Bar Section -->
         <div class="w-full relative z-30">
             <div class="flex items-center white-card rounded-2xl p-1.5 shadow-sm border border-gray-200 relative">
                 <div class="pl-3 pr-2 text-gray-400">
@@ -174,7 +174,6 @@
                     <i id="layer-icon" class="fa-solid fa-satellite text-blue-600"></i>
                     <span id="lbl-layer-toggle">ດາວທຽມ</span>
                 </button>
-                <!-- ปุ่มทดสอบเสียง AI -->
                 <button onclick="testVoiceAI()" class="bg-blue-600 hover:bg-blue-700 text-white font-medium px-3 py-1.5 rounded-xl shadow-md text-xs flex items-center space-x-1.5 transition active:scale-95 backdrop-blur-md" title="ทดสอบเสียง AI">
                     <i class="fa-solid fa-volume-high"></i>
                     <span id="lbl-test-voice">ທົດສອບສຽງ AI</span>
@@ -190,7 +189,6 @@
 
         <!-- Controls & Dashboard Combined Panel -->
         <div class="w-full shrink-0 flex flex-col gap-2 z-10">
-            
             <div class="white-card p-3 rounded-2xl flex flex-col gap-2 shadow-md">
                 
                 <!-- 1. Route Result Section -->
@@ -253,7 +251,6 @@
                 </div>
 
             </div>
-
         </div>
 
         <!-- Bottom Details Accordion Section -->
@@ -271,7 +268,6 @@
                     <p id="detail-p1">ເວັບໄຊນີ້ສ້າງມາເພື່ອຄົນລາວ ແລະ ຊາວຕ່າງຊາດທີ່ມາທ່ອງທ່ຽວໃນປະເທດລາວ ແຕ່ບໍ່ຮູ້ວ່າຕ້ອງເລີ່ມໄປທີ່ໃດກ່ອນໃນລາວ ແລະ ສະຖານທີ່ທ່ອງທ່ຽວ ແລະ ເບິ່ງສະຖານທີ່ໃຫ້ໄປຖືກທາງບໍ່ຫຼົງທາງ ໂອກາດຫຼົງຈະໜ້ອຍລົງ</p>
                     <p id="detail-p2">ພວກພວກເຮົາຍິນດີໃຫ້ບໍລິການຟຣີ ບໍ່ມີຄ່າໃຊ້ຈ່າຍ ມີລະບົບນຳທາງດ້ວຍສຽງ ແລະ ມີລະບົບກວດຈັບເມື່ອເສັ້ນທາງໃດທີ່ໄປເຖິງໄວກວ່າ ລະບົບຈະປ່ຽນເສັ້ນທາງໂດຍອັດຕະໂນມັດ</p>
                     
-                    <!-- Q&A Section with Toggle Answer -->
                     <div class="bg-blue-50/60 p-2.5 rounded-xl border border-blue-100 space-y-1.5 mt-2">
                         <div onclick="toggleAnswer()" class="flex items-center space-x-2 text-blue-900 font-bold cursor-pointer hover:text-blue-700 transition">
                             <i class="fa-solid fa-circle-question text-blue-600 text-sm shrink-0"></i>
@@ -283,7 +279,6 @@
                         </div>
                     </div>
 
-                    <!-- Centered Footer Details -->
                     <div class="pt-3 border-t border-gray-100 flex flex-col items-center justify-center text-center gap-1.5 text-[11px] text-gray-500">
                         <span id="detail-creator">ເວັບໄຊນີ້ສ້າງໂດຍ <strong>Vathsana Syhalath</strong></span>
                         <span id="detail-contact">ສະໜັບສະໜູນ ຫຼື ຕິດຕໍ່ສອບຖາມລາຍລະອຽດຕ່າງໆ ໄດ້ທີ່:</span>
@@ -391,13 +386,14 @@
             ms: {
                 brand: "Bogie Maps", subtitle: "Navigasi Pintar", vehicleTitle: "Pilih Mod", instruction: "Klik pada peta", car: "Kereta", moto: "Motosikal", bicycle: "Basikal", walk: "Jalan Kaki", resultTitle: "Ringkasan", currentAddress: "Lokasi Semasa", distTitle: "Jarak", timeTitle: "Masa", arriveTitle: "Tiba", layerSat: "Satelit", layerRoad: "Jalan", distUnit: "km", minUnit: "minit", hourUnit: "jam", dayUnit: "hari", testVoiceBtn: "Uji Suara", searchPlaceholder: "Cari...", searchBtn: "Cari",
                 totalRouteSpeech: "Jumlah jarak {dist} km", rerouteSpeech: "Laluan dikemas kini", testSpeech: "Sedia",
-                detailTitle: "Butiran", detailP1: "For tourists...", detailP2: "Free service", detailQaQ: "Bagaimanakah anda tahu peluang untuk tersesat akan berkurangan?", detailQaA: "Kerana laman web ini 100% dicipta oleh penduduk tempatan Laos yang bekerjasama dengan pakar laluan.", detailCreator: "Dicipta oleh <strong>Vathsana Syhalath</strong>", detailContact: "Hubungi:"
+                detailTitle: "Butiran", detailP1: "For tourists...", detailP2: "Free service", detailQaQ: "Bagaimanakah anda tahu peluang untuk tersesat akan berkurangan?", detailQaA: "Kerana laman web này 100% dicipta oleh penduduk tempatan Laos yang bekerjasama dengan pakar laluan.", detailCreator: "Dicipta oleh <strong>Vathsana Syhalath</strong>", detailContact: "Hubungi:"
             }
         };
 
         let streetLayer, satelliteLayer;
 
         function initMap() {
+            // สร้างแผนที่โดยตั้งค่าเริ่มต้นไว้ก่อน (ยังไม่ฟิกซ์ตำแหน่งตายตัว)
             map = L.map('map', { 
                 zoomControl: false, 
                 dragging: true,
@@ -425,8 +421,53 @@
             }, { passive: true });
 
             changeLanguage('lo', 'ລາວ', 'la');
-            startRealtimeTracking();
+            
+            // เรียกบังคับขอพิกัดจริงทันทีที่เข้าเว็บ
+            requestInitialLocation();
+            
             renderSuggestions(popularLocations);
+        }
+
+        // ฟังก์ชันบังคับขอตำแหน่งปัจจุบันทันทีเมื่อเปิดเว็บ
+        function requestInitialLocation() {
+            if (navigator.geolocation) {
+                navigator.geolocation.getCurrentPosition(
+                    (position) => {
+                        const lat = position.coords.latitude;
+                        const lng = position.coords.longitude;
+                        userCoords = [lat, lng];
+
+                        if (!userMarker) {
+                            const userIcon = L.divIcon({
+                                className: 'custom-user-marker',
+                                html: `<div class="w-7 h-7 bg-blue-600 rounded-full border-4 border-white shadow-lg animate-pulse flex items-center justify-center"><div class="w-2.5 h-2.5 bg-white rounded-full"></div></div>`,
+                                iconSize: [28, 28],
+                                iconAnchor: [14, 14]
+                            });
+                            userMarker = L.marker(userCoords, { icon: userIcon }).addTo(map);
+                        } else {
+                            userMarker.setLatLng(userCoords);
+                        }
+
+                        // ซูมไปยังตำแหน่งจริงของผู้ใช้ทันที
+                        map.setView(userCoords, 16, { animate: true });
+
+                        // เริ่มเปิดระบบติดตามพิกัดแบบเรียลไทม์ต่อ
+                        startRealtimeTracking();
+                    },
+                    (error) => {
+                        console.warn("Geolocation permission denied or error: ", error.message);
+                        // หากผู้ใช้ไม่อนุญาตหรือเกิดข้อผิดพลาด ให้ใช้พิกัดสำรองเริ่มต้น
+                        userCoords = [17.9757, 102.6331];
+                        userMarker = L.marker(userCoords).addTo(map);
+                        map.setView(userCoords, 14);
+                        startRealtimeTracking();
+                    },
+                    { enableHighAccuracy: true, timeout: 10000, maximumAge: 0 }
+                );
+            } else {
+                alert("เบຣາວ໌ເຊີຂອງທ່ານບໍ່ຮອງຮັບການລະບຸຕຳແໜ່ງ GPS");
+            }
         }
 
         function toggleDetails() {
@@ -646,12 +687,13 @@
             if (userCoords) {
                 map.setView(userCoords, 17, { animate: true });
             } else {
-                startRealtimeTracking();
+                requestInitialLocation();
             }
         }
 
         function startRealtimeTracking() {
             if (navigator.geolocation) {
+                if (watchId !== null) navigator.geolocation.clearWatch(watchId);
                 watchId = navigator.geolocation.watchPosition(
                     (position) => {
                         const lat = position.coords.latitude;
@@ -675,7 +717,6 @@
                                 iconAnchor: [14, 14]
                             });
                             userMarker = L.marker(userCoords, { icon: userIcon }).addTo(map);
-                            map.setView(userCoords, 16, { animate: true });
                         } else {
                             userMarker.setLatLng(userCoords);
                         }
@@ -688,16 +729,9 @@
                     },
                     (error) => {
                         console.warn("WatchPosition error: ", error.message);
-                        if (!userCoords) {
-                            userCoords = [17.9757, 102.6331];
-                            userMarker = L.marker(userCoords).addTo(map);
-                            map.setView(userCoords, 14);
-                        }
                     },
                     { enableHighAccuracy: true, timeout: 10000, maximumAge: 0 }
                 );
-            } else {
-                alert("เบราว์เซอร์ของคุณไม่รองรับการระบุตำแหน่ง GPS");
             }
         }
 
@@ -807,9 +841,9 @@
                     const t = translations[currentLang] || translations['en'];
                     updateDurationDisplay(timeInMinutes);
 
-                    const now = new Date();
-                    now.setMinutes(now.getMinutes() + timeInMinutes);
-                    const arrivalTimeStr = now.toLocaleTimeString('th-TH', { hour: '2-digit', minute: '2-digit' });
+                    const np = new Date();
+                    np.setMinutes(np.getMinutes() + timeInMinutes);
+                    const arrivalTimeStr = np.toLocaleTimeString('th-TH', { hour: '2-digit', minute: '2-digit' });
 
                     document.getElementById('txt-distance').innerHTML = `${formattedDist} <span class="dist-unit">${t.distUnit}</span>`;
                     document.getElementById('txt-arrival').innerText = arrivalTimeStr;
