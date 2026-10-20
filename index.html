@@ -136,7 +136,7 @@
         </div>
     </header>
 
-    <!-- Android Install Prompt Banner (แสดงเฉพาะ Android เมื่อเบราว์เซอร์พร้อมติดตั้ง) -->
+    <!-- Android Install Prompt Banner -->
     <div id="android-install-banner" class="hidden bg-gradient-to-r from-blue-600 to-indigo-600 text-white px-3 py-2.5 mt-[55px] flex items-center justify-between z-40 shadow-md shrink-0">
         <div class="flex items-center space-x-2.5">
             <div class="w-9 h-9 bg-white/20 rounded-xl flex items-center justify-center shrink-0 backdrop-blur-xs">
@@ -319,11 +319,9 @@
         let isSpeaking = false;
         let deferredPrompt = null;
 
-        // PWA Install Event Handler (เฉพาะ Android / Chrome)
         window.addEventListener('beforeinstallprompt', (e) => {
             e.preventDefault();
             deferredPrompt = e;
-            // ตรวจสอบว่าเป็นมือถือ Android หรือไม่
             const isAndroid = /android/i.test(navigator.userAgent);
             if (isAndroid) {
                 document.getElementById('android-install-banner').classList.remove('hidden');
@@ -336,9 +334,6 @@
             if (deferredPrompt) {
                 deferredPrompt.prompt();
                 deferredPrompt.userChoice.then((choiceResult) => {
-                    if (choiceResult.outcome === 'accepted') {
-                        console.log('User accepted the install prompt');
-                    }
                     deferredPrompt = null;
                     dismissInstallBanner();
                 });
@@ -415,7 +410,7 @@
             es: {
                 brand: "Bogie Maps", subtitle: "Navegación Inteligente", vehicleTitle: "Modo de viaje", instruction: "Haga clic en el mapa", car: "Coche", moto: "Moto", bicycle: "Bicicleta", walk: "A pie", resultTitle: "Resumen de ruta", currentAddress: "Ubicación actual", distTitle: "Distancia", timeTitle: "Duración", arriveTitle: "Llegada est.", layerSat: "Satélite", layerRoad: "Calle", distUnit: "km", minUnit: "min", hourUnit: "h", dayUnit: "días", testVoiceBtn: "Probar voz", searchPlaceholder: "Buscar...", searchBtn: "Buscar",
                 totalRouteSpeech: "Distancia total {dist} km", rerouteSpeech: "Ruta actualizada", testSpeech: "Listo",
-                detailTitle: "Detalles", detailP1: "Creado para turistas...", detailP2: "Servicio gratuito", detailQaQ: "¿Cómo sabes que la posibilidad de perderte será mínima?", detailQaA: "Porque este sitio web fue creado 100% por lugareños de Laos en colaboración con expertos en rutas.", detailCreator: "Creado por <strong>Vathsana Syhalath</strong>", detailContact: "Contacto:"
+                detailTitle: "Detalles", detailP1: "Creado para turistas...", detailP2: "Servicio gratuito", detailQaQ: "¿Cómo sabes que la posibilidad de perderte será mínima?", detailQaA: "Porque este sitio web fue creado 100% por lugareños de Laos в colaboración con expertos en rutas.", detailCreator: "Creado por <strong>Vathsana Syhalath</strong>", detailContact: "Contacto:"
             },
             id: {
                 brand: "Bogie Maps", subtitle: "Navigasi Pintar", vehicleTitle: "Pilih Moda", instruction: "Klik di peta", car: "Mobil", moto: "Motor", bicycle: "Sepeda", walk: "Jalan", resultTitle: "Ringkasan Rute", currentAddress: "Lokasi Anda", distTitle: "Jarak", timeTitle: "Durasi", arriveTitle: "Estimasi Tiba", layerSat: "Satelit", layerRoad: "Jalan", distUnit: "km", minUnit: "menit", hourUnit: "jam", dayUnit: "hari", testVoiceBtn: "Tes Suara", searchPlaceholder: "Cari...", searchBtn: "Cari",
@@ -488,12 +483,15 @@
                     },
                     (error) => {
                         console.warn("Geolocation permission error: ", error.message);
+                        // แจ้งเตือนผู้ใช้กรณีที่เบราว์เซอร์ไม่อนุญาตสิทธิ์ตำแหน่ง
+                        alert("กรุณาเปิดอนุญาตสิทธิ์การเข้าถึงตำแหน่ง GPS ในการตั้งค่าเบราว์เซอร์ เพื่อให้ระบบปักหมุดตรงตำแหน่งจริงของคุณ");
+                        
                         userCoords = [17.9757, 102.6331];
                         userMarker = L.marker(userCoords).addTo(map);
                         map.setView(userCoords, 14);
                         startRealtimeTracking();
                     },
-                    { enableHighAccuracy: true, timeout: 10000, maximumAge: 0 }
+                    { enableHighAccuracy: true, timeout: 15000, maximumAge: 0 }
                 );
             } else {
                 alert("เบຣາວ໌ເຊີຂອງທ່ານບໍ່ຮອງຮັບການລະບຸຕຳແໜ່ງ GPS");
@@ -760,7 +758,7 @@
                     (error) => {
                         console.warn("WatchPosition error: ", error.message);
                     },
-                    { enableHighAccuracy: true, timeout: 10000, maximumAge: 0 }
+                    { enableHighAccuracy: true, timeout: 15000, maximumAge: 0 }
                 );
             }
         }
