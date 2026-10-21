@@ -16,6 +16,8 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <!-- Google Fonts -->
     <link href="https://fonts.googleapis.com/css2?family=Kanit:wght@300;400;500;600;700&family=Noto+Sans+Lao:wght@300;400;600;700&display=swap" rel="stylesheet">
+    <!-- QR Code Generator Library -->
+    <script src="https://cdn.jsdelivr.net/npm/qrcode@1.5.1/build/qrcode.min.js"></script>
     <style>
         body { 
             font-family: 'Kanit', 'Noto Sans Lao', sans-serif; 
@@ -39,8 +41,8 @@
             box-shadow: 0 1px 3px rgba(0,0,0,0.1);
         }
         .map-container-large {
-            height: 48vh;
-            min-height: 280px;
+            height: 46vh;
+            min-height: 260px;
         }
         #map { height: 100%; width: 100%; border-radius: 1rem; z-index: 10; touch-action: pan-x pan-y; }
         .leaflet-control-attribution { display: none !important; }
@@ -52,7 +54,7 @@
 </head>
 <body class="bg-gray-100 text-gray-800 min-h-screen flex flex-col">
 
-    <!-- Top Header (Fixed on top) -->
+    <!-- Top Header -->
     <header class="bg-white border-b border-gray-200 px-3 py-2 flex items-center justify-between z-50 shadow-xs shrink-0 fixed top-0 left-0 right-0">
         <div class="flex items-center space-x-2">
             <img src="https://i.postimg.cc/brMTXmjN/6732C3AC-E5C4-4568-B02F-84985799FE09.png" alt="Logo" class="w-9 h-9 object-contain shrink-0 drop-shadow-xs">
@@ -130,32 +132,11 @@
                 </div>
             </div>
 
-            <button onclick="resetAll()" class="bg-gray-100 hover:bg-gray-200 text-gray-700 w-9 h-9 rounded-xl text-sm transition border border-gray-200 active:scale-95 flex items-center justify-center shrink-0 shadow-2xs" title="รีเซ็ต">
+            <button onclick="resetAll()" class="bg-gray-100 hover:bg-gray-200 text-gray-700 w-9 h-9 rounded-xl text-sm transition border border-gray-200 active:scale-95 flex items-center justify-center shrink-0 shadow-2xs" title="ຣີເຊັດ">
                 <i class="fa-solid fa-rotate-right"></i>
             </button>
         </div>
     </header>
-
-    <!-- Android Install Prompt Banner -->
-    <div id="android-install-banner" class="hidden bg-gradient-to-r from-blue-600 to-indigo-600 text-white px-3 py-2.5 mt-[55px] flex items-center justify-between z-40 shadow-md shrink-0">
-        <div class="flex items-center space-x-2.5">
-            <div class="w-9 h-9 bg-white/20 rounded-xl flex items-center justify-center shrink-0 backdrop-blur-xs">
-                <i class="fa-solid fa-mobile-screen-button text-white text-base"></i>
-            </div>
-            <div>
-                <h2 class="text-xs font-bold">ติดตั้งแอป Bogie Maps</h2>
-                <p class="text-[10px] text-blue-100">เพิ่มลงหน้าจอหลักเพื่อใช้งานสะดวกรวดเร็วขึ้น</p>
-            </div>
-        </div>
-        <div class="flex items-center space-x-1.5">
-            <button onclick="installApp()" class="bg-white text-blue-600 px-3 py-1.5 rounded-xl text-xs font-bold shadow-xs active:scale-95 transition">
-                ติดตั้ง
-            </button>
-            <button onclick="dismissInstallBanner()" class="text-blue-200 hover:text-white px-1.5 py-1 text-xs">
-                <i class="fa-solid fa-xmark"></i>
-            </button>
-        </div>
-    </div>
 
     <!-- Main Content Layout -->
     <div id="main-content-layout" class="flex-1 flex flex-col p-2.5 gap-2 bg-gray-100 mt-[55px] mb-4">
@@ -171,7 +152,7 @@
                 </button>
 
                 <div id="suggestions-box" class="hidden absolute top-full left-0 right-0 mt-1.5 bg-white border border-gray-200 rounded-2xl shadow-xl py-2 z-50 max-h-60 overflow-y-auto">
-                    <div class="px-3 py-1 text-[10px] font-bold text-gray-400 uppercase tracking-wider">สถานที่แนะนำยอดฮิต</div>
+                    <div id="lbl-suggestion-header" class="px-3 py-1 text-[10px] font-bold text-gray-400 uppercase tracking-wider">ສະຖານທີ່ແນະນຳຍອດນິຍົມ</div>
                     <div id="suggestions-list"></div>
                 </div>
             </div>
@@ -185,7 +166,7 @@
                     <i id="layer-icon" class="fa-solid fa-satellite text-blue-600"></i>
                     <span id="lbl-layer-toggle">ດາວທຽມ</span>
                 </button>
-                <button onclick="testVoiceAI()" class="bg-blue-600 hover:bg-blue-700 text-white font-medium px-3 py-1.5 rounded-xl shadow-md text-xs flex items-center space-x-1.5 transition active:scale-95 backdrop-blur-md" title="ทดสอบเสียง AI">
+                <button onclick="testVoiceAI()" class="bg-blue-600 hover:bg-blue-700 text-white font-medium px-3 py-1.5 rounded-xl shadow-md text-xs flex items-center space-x-1.5 transition active:scale-95 backdrop-blur-md" title="ທົດສອບສຽງ AI">
                     <i class="fa-solid fa-volume-high"></i>
                     <span id="lbl-test-voice">ທົດສອບສຽງ AI</span>
                 </button>
@@ -194,6 +175,17 @@
             <div class="absolute bottom-2 left-1/2 -translate-x-1/2 z-[400] pointer-events-none bg-white/85 backdrop-blur-xs px-2.5 py-0.5 rounded-md border border-gray-200/50 shadow-2xs flex items-center space-x-1 text-[10px] text-gray-500">
                 <i class="fa-regular fa-copyright text-[9px]"></i>
                 <span>Bogie Maps by Vathsana</span>
+            </div>
+        </div>
+
+        <!-- 🔴 ส่วนแสดงชื่อสถานที่/บ้าน/แขວງ ຢູ່ใต้แผนที่ -->
+        <div id="destination-info-card" class="white-card px-3.5 py-2.5 rounded-2xl flex items-center space-x-3 shadow-sm border border-red-100 shrink-0">
+            <div class="text-red-600 text-xl shrink-0 flex items-center justify-center pl-0.5">
+                <i class="fa-solid fa-location-dot"></i>
+            </div>
+            <div class="flex-1 min-w-0">
+                <span id="lbl-selected-place-title" class="text-[10px] font-bold text-red-600 uppercase tracking-wider block">ປາຍທາງທີ່ເລືອກ</span>
+                <p id="txt-selected-place-name" class="text-xs sm:text-sm font-bold text-gray-800 truncate">ກະລຸນາຄລິກປັກໝຸດເທິງແຜນທີ່ ຫຼື ຄົ້ນຫາສະຖານທີ່</p>
             </div>
         </div>
 
@@ -206,7 +198,7 @@
                             <i class="fa-solid fa-route"></i>
                             <span id="lbl-result-title">ສະຫຼຸບຜົນການນຳທາງຕາມເສັ້ນທາງຕົວຈິງ</span>
                         </span>
-                        <button onclick="centerToUserLocation()" class="cursor-pointer bg-emerald-50 hover:bg-emerald-100 text-emerald-700 text-xs px-2.5 py-1 rounded-full font-bold border border-emerald-200 shrink-0 flex items-center space-x-1 shadow-2xs transition active:scale-95" title="คลิกเพื่อไปที่ตำแหน่งของคุณ">
+                        <button onclick="centerToUserLocation()" class="cursor-pointer bg-emerald-50 hover:bg-emerald-100 text-emerald-700 text-xs px-2.5 py-1 rounded-full font-bold border border-emerald-200 shrink-0 flex items-center space-x-1 shadow-2xs transition active:scale-95" title="ໄປທີ່ຕຳແໜ່ງຂອງທ່ານ">
                             <i class="fa-solid fa-crosshairs animate-pulse text-emerald-600"></i>
                             <span id="lbl-current-address" class="text-[10px]">ທີ່ຢູ່ຂອງທ່ານປະຈຸບັນ</span>
                         </button>
@@ -288,7 +280,23 @@
                     <div class="pt-3 border-t border-gray-100 flex flex-col items-center justify-center text-center gap-1.5 text-[11px] text-gray-500">
                         <span id="detail-creator">ເວັບໄຊນີ້ສ້າງໂດຍ <strong>Vathsana Syhalath</strong></span>
                         <span id="detail-contact">ສະໜັບສະໜູນ ຫຼື ຕິດຕໍ່ສອບຖາມລາຍລະອຽດຕ່າງໆ ໄດ້ທີ່:</span>
-                        <a href="https://wa.me/8562054873355" target="_blank" class="inline-flex items-center space-x-1.5 text-emerald-600 font-bold hover:underline mt-0.5 bg-emerald-50 px-3 py-1.5 rounded-xl border border-emerald-200 transition active:scale-95">
+                        
+                        <div class="w-full bg-amber-100/60 border border-amber-300 rounded-xl p-2.5 flex items-center justify-between text-amber-900 my-1">
+                            <span class="text-xs font-bold flex items-center space-x-1.5">
+                                <i class="fa-solid fa-hand-holding-dollar text-amber-600"></i>
+                                <span id="lbl-total-text">ຈຳນວນເງິນລວມທັງໝົດ:</span>
+                            </span>
+                            <span id="total-donate-amount" class="text-xs font-bold text-amber-700">0 LAK</span>
+                        </div>
+
+                        <button onclick="openDonateModal()" class="w-full inline-flex items-center justify-center space-x-2 text-amber-800 font-bold hover:bg-amber-100 bg-amber-50 px-3 py-2.5 rounded-xl border border-amber-200 transition active:scale-95 shadow-xs">
+                            <div class="w-6 h-6 rounded-full bg-amber-500 text-white flex items-center justify-center text-xs shrink-0 shadow-2xs">
+                                <i class="fa-solid fa-mug-hot"></i>
+                            </div>
+                            <span id="lbl-donate-btn">ສະໜັບສະໜູນຄ່າກາເຟ / Donate</span>
+                        </button>
+
+                        <a href="https://wa.me/8562054873355" target="_blank" class="w-full inline-flex items-center justify-center space-x-1.5 text-emerald-600 font-bold hover:underline mt-1 bg-emerald-50 px-3 py-2 rounded-xl border border-emerald-200 transition active:scale-95">
                             <i class="fa-brands fa-whatsapp text-sm"></i>
                             <span>WhatsApp: +856 2054873355</span>
                         </a>
@@ -297,6 +305,76 @@
             </div>
         </div>
 
+    </div>
+
+    <!-- Modal สำหรับสร้าง QR และสแกนจ่าย -->
+    <div id="donate-modal" class="hidden fixed inset-0 bg-black/60 backdrop-blur-xs z-50 flex items-center justify-center p-4">
+        <div class="bg-white rounded-3xl max-w-sm w-full p-6 shadow-2xl border border-gray-100 flex flex-col items-center relative">
+            <button onclick="closeDonateModal()" class="absolute top-4 right-4 text-gray-400 hover:text-gray-600 text-base w-8 h-8 rounded-full bg-gray-50 flex items-center justify-center transition">
+                <i class="fa-solid fa-xmark"></i>
+            </button>
+            
+            <div id="modal-top-icon" class="w-14 h-14 bg-gradient-to-tr from-amber-500 to-amber-600 rounded-2xl flex items-center justify-center text-white mb-3 shadow-md shadow-amber-500/20">
+                <i class="fa-solid fa-mug-hot text-2xl"></i>
+            </div>
+            
+            <h3 id="donate-modal-title" class="font-bold text-gray-900 text-base mb-1">ສະໜັບສະໜູນພວກເຮົາ</h3>
+            <p id="donate-modal-subtitle" class="text-xs text-gray-500 text-center mb-4">ກະລຸນາລະບຸຈຳນວນເງິນ LAK (ຂັ້ນຕໍ່າ 1,000)</p>
+
+            <div id="donate-form" class="w-full flex flex-col gap-3">
+                <div class="relative">
+                    <input type="number" id="donate-amount" min="1000" value="1000" class="w-full bg-gray-50 border border-gray-200 rounded-2xl px-4 py-3 text-sm font-bold text-gray-800 outline-none focus:border-amber-500 focus:bg-white transition" placeholder="ລະບຸຈຳນວນເງິນ">
+                    <span class="absolute right-4 top-1/2 -translate-y-1/2 text-xs font-bold text-gray-400">LAK</span>
+                </div>
+
+                <div class="grid grid-cols-3 gap-1.5">
+                    <button onclick="setPresetAmount(1000)" type="button" class="bg-gray-50 hover:bg-amber-50 hover:border-amber-500 text-gray-700 text-xs font-bold py-1.5 px-2 rounded-xl border border-gray-200 transition">1,000 ₭</button>
+                    <button onclick="setPresetAmount(5000)" type="button" class="bg-gray-50 hover:bg-amber-50 hover:border-amber-500 text-gray-700 text-xs font-bold py-1.5 px-2 rounded-xl border border-gray-200 transition">5,000 ₭</button>
+                    <button onclick="setPresetAmount(10000)" type="button" class="bg-gray-50 hover:bg-amber-50 hover:border-amber-500 text-gray-700 text-xs font-bold py-1.5 px-2 rounded-xl border border-gray-200 transition">10,000 ₭</button>
+                    <button onclick="setPresetAmount(50000)" type="button" class="bg-gray-50 hover:bg-amber-50 hover:border-amber-500 text-gray-700 text-xs font-bold py-1.5 px-2 rounded-xl border border-gray-200 transition">50,000 ₭</button>
+                    <button onclick="setPresetAmount(100000)" type="button" class="bg-gray-50 hover:bg-amber-50 hover:border-amber-500 text-gray-700 text-xs font-bold py-1.5 px-2 rounded-xl border border-gray-200 transition">100,000 ₭</button>
+                    <button onclick="setPresetAmount(200000)" type="button" class="bg-gray-50 hover:bg-amber-50 hover:border-amber-500 text-gray-700 text-xs font-bold py-1.5 px-2 rounded-xl border border-gray-200 transition">200,000 ₭</button>
+                </div>
+
+                <button onclick="generateQRCode()" id="btn-gen-qr" class="w-full bg-amber-600 hover:bg-amber-700 text-white font-bold py-3 rounded-2xl text-xs transition active:scale-95 shadow-md shadow-amber-600/20 flex items-center justify-center space-x-2 mt-1">
+                    <i class="fa-solid fa-qrcode text-sm"></i>
+                    <span id="lbl-gen-qr-text">ສ້າງຄິວອາໂຄຣ໌ (Generate QR)</span>
+                </button>
+            </div>
+
+            <div id="donate-qr-container" class="hidden w-full flex flex-col items-center gap-3">
+                <div id="qr-loading" class="py-8 flex flex-col items-center justify-center gap-2">
+                    <i class="fa-solid fa-spinner fa-spin text-2xl text-amber-600"></i>
+                    <span id="lbl-qr-loading" class="text-xs text-gray-500">ກຳລັງສ້າງຄິວອາໂຄຣ໌...</span>
+                </div>
+                
+                <div id="qr-display" class="hidden flex flex-col items-center gap-3 w-full">
+                    <div class="p-3 bg-white border border-gray-200 rounded-2xl shadow-xs flex justify-center">
+                        <canvas id="qr-canvas" class="w-48 h-48 object-contain"></canvas>
+                        <img id="qr-image" src="" alt="Payment QR Code" class="w-48 h-48 object-contain hidden">
+                    </div>
+                    <div class="text-center w-full">
+                        <span class="text-xs text-gray-500 block mb-1"><span id="lbl-amount-label">ຈຳນວນເງິນ</span>: <strong id="lbl-pay-amount" class="text-gray-900 font-bold text-sm">0</strong> LAK</span>
+                        <div class="flex items-center justify-center space-x-1.5 text-xs text-amber-700 bg-amber-50 px-3 py-1.5 rounded-xl border border-amber-200 mb-1.5">
+                            <i class="fa-solid fa-rotate fa-spin text-[10px]"></i>
+                            <span id="lbl-status-text">ກຳລັງລໍຖ້າການຊຳລະເງິນ...</span>
+                        </div>
+                        <div class="text-[11px] text-gray-500 bg-gray-50 py-1 px-2 rounded-lg border border-gray-200 mb-2">
+                            <span id="lbl-expire-text">ຄິວອາໂຄຣ໌ຈະໝົດອາຍຸໃນ</span>: <span id="scan-countdown" class="font-bold text-amber-600">03:00</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div id="donate-success" class="hidden w-full flex flex-col items-center gap-3 py-2 text-center">
+                <div class="bg-emerald-50 border border-emerald-200 px-4 py-2.5 rounded-xl text-emerald-800 font-bold text-sm my-1 w-full">
+                    <span id="lbl-success-amount-title">ຈຳນວນເງິນ</span>: <span id="success-amount-text" class="text-emerald-700">0</span> LAK
+                </div>
+                <button onclick="closeDonateModal()" id="lbl-close-btn" class="mt-2 w-full bg-gray-100 hover:bg-gray-200 text-gray-700 font-bold py-3 rounded-2xl text-xs transition">
+                    ປິດໜ້າຕ່າງ
+                </button>
+            </div>
+        </div>
     </div>
 
     <!-- Script -->
@@ -317,33 +395,204 @@
         let speechUnlocked = false;
         let speechQueue = [];
         let isSpeaking = false;
-        let deferredPrompt = null;
+        let checkInterval = null;
+        let scanCountdownInterval = null;
 
-        window.addEventListener('beforeinstallprompt', (e) => {
-            e.preventDefault();
-            deferredPrompt = e;
-            const isAndroid = /android/i.test(navigator.userAgent);
-            if (isAndroid) {
-                document.getElementById('android-install-banner').classList.remove('hidden');
-                document.getElementById('main-content-layout').classList.remove('mt-[55px]');
-                document.getElementById('main-content-layout').classList.add('mt-[105px]');
+        const JVIX_API_KEY = "jvixcloud_live_4ec8bf9bd9182b34cc44dd46f3539810795c4757dfd074b1";
+        const JVIX_BASE_URL = "https://jvix.xyz";
+
+        function setPresetAmount(val) {
+            document.getElementById('donate-amount').value = val;
+        }
+
+        function updateDonationTotalDisplay() {
+            let total = parseFloat(localStorage.getItem('bogie_total_donation') || 0);
+            document.getElementById('total-donate-amount').innerText = total.toLocaleString() + " LAK";
+        }
+
+        function addDonationAmount(amount) {
+            let total = parseFloat(localStorage.getItem('bogie_total_donation') || 0);
+            total += amount;
+            localStorage.setItem('bogie_total_donation', total);
+            updateDonationTotalDisplay();
+        }
+
+        function openDonateModal() {
+            const t = translations[currentLang] || translations['en'];
+            document.getElementById('donate-modal').classList.remove('hidden');
+            document.getElementById('donate-form').classList.remove('hidden');
+            document.getElementById('donate-qr-container').classList.add('hidden');
+            document.getElementById('donate-success').classList.add('hidden');
+            
+            const iconContainer = document.getElementById('modal-top-icon');
+            iconContainer.className = "w-14 h-14 bg-gradient-to-tr from-amber-500 to-amber-600 rounded-2xl flex items-center justify-center text-white mb-3 shadow-md shadow-amber-500/20";
+            iconContainer.innerHTML = '<i class="fa-solid fa-mug-hot text-2xl"></i>';
+
+            document.getElementById('donate-modal-title').innerText = t.donateModalTitle;
+            document.getElementById('donate-modal-subtitle').innerText = t.donateModalSub;
+            if (checkInterval) clearInterval(checkInterval);
+            if (scanCountdownInterval) clearInterval(scanCountdownInterval);
+        }
+
+        function closeDonateModal() {
+            document.getElementById('donate-modal').classList.add('hidden');
+            if (checkInterval) clearInterval(checkInterval);
+            if (scanCountdownInterval) clearInterval(scanCountdownInterval);
+        }
+
+        function handlePaymentSuccess(amount) {
+            if (checkInterval) clearInterval(checkInterval);
+            if (scanCountdownInterval) clearInterval(scanCountdownInterval);
+
+            addDonationAmount(amount);
+
+            const t = translations[currentLang] || translations['en'];
+            document.getElementById('donate-qr-container').classList.add('hidden');
+            document.getElementById('donate-success').classList.remove('hidden');
+            document.getElementById('success-amount-text').innerText = amount.toLocaleString();
+            
+            const iconContainer = document.getElementById('modal-top-icon');
+            iconContainer.className = "w-14 h-14 bg-emerald-100 rounded-full flex items-center justify-center text-emerald-600 text-2xl mb-3 shadow-md";
+            iconContainer.innerHTML = '<i class="fa-solid fa-check"></i>';
+
+            document.getElementById('donate-modal-title').innerText = t.successTitle;
+            document.getElementById('donate-modal-subtitle').innerText = t.successSub;
+
+            triggerSuccessSpeech(amount);
+        }
+
+        function triggerSuccessSpeech(amount) {
+            const formattedAmount = amount.toLocaleString();
+            let speechText = `ขอบคุณสำหรับการสนับสนุนพวกเรา จำนวน ${formattedAmount} กีบ ครับ`;
+            if (currentLang === 'zh') {
+                speechText = `感谢您的支持，金额 ${formattedAmount} 基普。`;
+            } else if (currentLang === 'hi') {
+                speechText = `आपके समर्थन के लिए धन्यवाद, राशि ${formattedAmount} kip।`;
+            } else if (currentLang === 'en') {
+                speechText = `Thank you for your support, amount ${formattedAmount} Kip.`;
             }
-        });
+            speakSiri(speechText, true);
+        }
 
-        function installApp() {
-            if (deferredPrompt) {
-                deferredPrompt.prompt();
-                deferredPrompt.userChoice.then((choiceResult) => {
-                    deferredPrompt = null;
-                    dismissInstallBanner();
+        async function generateQRCode() {
+            const amountInput = document.getElementById('donate-amount').value;
+            const amount = parseInt(amountInput);
+            const t = translations[currentLang] || translations['en'];
+
+            if (isNaN(amount) || amount < 1000) {
+                alert(currentLang === 'lo' ? "ກະລຸນາໃສ່ຈຳນວນເງິນຢ່າງໜ້ອຍ 1,000 ກີບ" : (currentLang === 'th' ? "กรุณาใส่จำนวนเงินอย่างน้อย 1,000 LAK" : "Please enter at least 1,000 LAK"));
+                return;
+            }
+
+            document.getElementById('donate-form').classList.add('hidden');
+            document.getElementById('donate-qr-container').classList.remove('hidden');
+            document.getElementById('qr-loading').classList.remove('hidden');
+            document.getElementById('qr-display').classList.add('hidden');
+
+            document.getElementById('donate-modal-title').innerText = t.scanModalTitle;
+            document.getElementById('donate-modal-subtitle').innerText = t.scanModalSub;
+
+            try {
+                const response = await fetch(`${JVIX_BASE_URL}/api/v1/oneplay/generate`, {
+                    method: 'POST',
+                    headers: {
+                        'Authorization': `Bearer ${JVIX_API_KEY}`,
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({ amount: amount })
                 });
+
+                const result = await response.json();
+
+                if (result) {
+                    const data = result.data || result;
+                    const qrValue = data.qr || data.qrCode || data.qr_image || data.image || data.qrcode || data.url || data.payload;
+                    const transactionId = data.transactionId || data.transaction_id || data.id;
+
+                    if (transactionId) {
+                        document.getElementById('lbl-pay-amount').innerText = amount.toLocaleString();
+                        document.getElementById('qr-loading').classList.add('hidden');
+                        document.getElementById('qr-display').classList.remove('hidden');
+
+                        if (qrValue && (qrValue.startsWith('http') || qrValue.startsWith('data:image'))) {
+                            document.getElementById('qr-image').src = qrValue;
+                            document.getElementById('qr-image').classList.remove('hidden');
+                            document.getElementById('qr-canvas').classList.add('hidden');
+                        } else if (qrValue) {
+                            document.getElementById('qr-image').classList.add('hidden');
+                            document.getElementById('qr-canvas').classList.remove('hidden');
+                            QRCode.toCanvas(document.getElementById('qr-canvas'), qrValue, { width: 192, margin: 1 }, function (error) {
+                                if (error) console.error(error);
+                            });
+                        } else {
+                            document.getElementById('qr-image').classList.add('hidden');
+                            document.getElementById('qr-canvas').classList.remove('hidden');
+                            QRCode.toCanvas(document.getElementById('qr-canvas'), `Jvix-Tx:${transactionId}-Amt:${amount}`, { width: 192, margin: 1 });
+                        }
+
+                        startPolling(transactionId, amount);
+                        startScanCountdown();
+                        return;
+                    }
+                }
+
+                alert(currentLang === 'lo' ? "ບໍ່ພົບຂໍ້ມູນ Transaction ຈາກລະບົບ Jvix" : "Transaction not found");
+                document.getElementById('donate-form').classList.remove('hidden');
+                document.getElementById('donate-qr-container').classList.add('hidden');
+                document.getElementById('donate-modal-title').innerText = t.donateModalTitle;
+                document.getElementById('donate-modal-subtitle').innerText = t.donateModalSub;
+
+            } catch (error) {
+                console.error("Jvix API Error:", error);
+                alert(currentLang === 'lo' ? "ເກີດຂໍ້ຜິດພາດໃນການເຊື່ອມຕໍ່ລະບົບຊຳລະເງິນ" : "Payment connection error");
+                document.getElementById('donate-form').classList.remove('hidden');
+                document.getElementById('donate-qr-container').classList.add('hidden');
+                document.getElementById('donate-modal-title').innerText = t.donateModalTitle;
+                document.getElementById('donate-modal-subtitle').innerText = t.donateModalSub;
             }
         }
 
-        function dismissInstallBanner() {
-            document.getElementById('android-install-banner').classList.add('hidden');
-            document.getElementById('main-content-layout').classList.remove('mt-[105px]');
-            document.getElementById('main-content-layout').classList.add('mt-[55px]');
+        function startScanCountdown() {
+            let totalSeconds = 180;
+            if (scanCountdownInterval) clearInterval(scanCountdownInterval);
+
+            scanCountdownInterval = setInterval(() => {
+                totalSeconds--;
+                let minutes = Math.floor(totalSeconds / 60);
+                let seconds = totalSeconds % 60;
+                document.getElementById('scan-countdown').innerText = 
+                    String(minutes).padStart(2, '0') + ":" + String(seconds).padStart(2, '0');
+
+                if (totalSeconds <= 0) {
+                    clearInterval(scanCountdownInterval);
+                    document.getElementById('scan-countdown').innerText = currentLang === 'lo' ? "ໝົດອາຍຸແລ້ວ" : (currentLang === 'th' ? "หมดอายุแล้ว" : "Expired");
+                }
+            }, 1000);
+        }
+
+        function startPolling(transactionId, amount) {
+            if (checkInterval) clearInterval(checkInterval);
+
+            checkInterval = setInterval(async () => {
+                try {
+                    const response = await fetch(`${JVIX_BASE_URL}/api/v1/oneplay/check`, {
+                        method: 'POST',
+                        headers: {
+                            'Authorization': `Bearer ${JVIX_API_KEY}`,
+                            'Content-Type': 'application/json'
+                        },
+                        body: JSON.stringify({ transactionId: transactionId })
+                    });
+
+                    const result = await response.json();
+                    
+                    if (result && (result.status === 'success' || result.success || result.statusText === 'success' || result.paid || result.data?.paid || result.statusText === 'paid')) {
+                        handlePaymentSuccess(amount);
+                    }
+                } catch (error) {
+                    console.error("Polling error:", error);
+                }
+            }, 3000);
         }
 
         const popularLocations = [
@@ -353,76 +602,82 @@
 
         const translations = {
             lo: {
-                brand: "Bogie Maps", subtitle: "ລະບົບນຳທາງອັດສະລິຍະຕາມເສັ້ນທາງຕົວຈິງ", vehicleTitle: "ເລືອກປະເພດການເດີນທາງ", instruction: "ຄລິກເທິງແຜນທີ່ເພື່ອປັກໝຸດ", car: "ລົດໃຫຍ່", moto: "ລົດຈັກ", bicycle: "ລົດຖີບ", walk: "ຍ່າງ/ແລ່ນ", resultTitle: "ສະຫຼຸບຜົນການນຳທາງຕາມເສັ້ນທາງຕົວຈິງ", currentAddress: "ທີ່ຢູ່ຂອງທ່ານປະຈຸບັນ", distTitle: "ໄລຍະທາງ", timeTitle: "ເວລາເດີນທາງ", arriveTitle: "ເຖິງປະມານ", layerSat: "ດາວທຽມ", layerRoad: "ແຜນທີ່ຖະໜົນ", distUnit: "ກມ.", minUnit: "ນາທີ", hourUnit: "ຊົ່ວໂມງ", dayUnit: "ມື້", testVoiceBtn: "ທົດສອບສຽງ AI", searchPlaceholder: "ຄົ້ນຫາສະຖານທີ່...", searchBtn: "ຄົ້ນຫາ",
-                totalRouteSpeech: "เส้นทางที่จะไปทั้งหมด {dist} กิโลเมตร", rerouteSpeech: "ได้เปลี่ยนเส้นทางแล้ว เพื่อความไวในการเดินทาง", testSpeech: "โบกี้เอไอ พร้อมใช้งานแล้วครับ",
-                detailTitle: "ລາຍລະອຽດກ່ຽວກັບບໍລິການຂອງພວກເຮົາ", detailP1: "ເວັບໄຊນີ້ສ້າງມາເພື່ອຄົນລາວ ແລະ ຊາວຕ່າງຊາດທີ່ມາທ່ອງທ່ຽວໃນປະເທດລາວ...", detailP2: "ພວກພວກເຮົາຍິນດີໃຫ້ບໍລິການຟຣີ ບໍ່ມີຄ່າໃຊ້ຈ່າຍ...", detailQaQ: "ແລ້ວທ່ານຮູ້ໄດ້ຈັ່ງໃດວ່າໂອກາດຫຼົງຈະໜ້ອຍລົງ?", detailQaA: "ເພາະວ່າເວັບໄຊນີ້ສ້າງໂດຍຄົນລາວ 100% ຮ່ວມມືກັບບຸກຄົນທີ່ຮູ້ເສັ້ນທາງເປັນຢ່າງດີ", detailCreator: "ເວັບໄຊນີ້ສ້າງໂດຍ <strong>Vathsana Syhalath</strong>", detailContact: "ສະໜັບສະໜູນ ຫຼື ຕິດຕໍ່ສອບຖາມລາຍລະອຽດຕ່າງໆ ໄດ້ທີ່:"
+                brand: "Bogie Maps", subtitle: "ລະບົບນຳທາງອັດສະລິຍະຕາມເສັ້ນທາງຕົວຈິງ", vehicleTitle: "ເລືອກປະເພດການເດີນທາງ", instruction: "ຄລິກເທິງແຜນທີ່ເພື່ອປັກໝຸດ", car: "ລົດໃຫຍ່", moto: "ລົດຈັກ", bicycle: "ລົດຖີບ", walk: "ຍ່າງ/ແລ່ນ", resultTitle: "ສະຫຼຸບຜົນການນຳທາງຕາມເສັ້ນທາງຕົວຈິງ", currentAddress: "ທີ່ຢູ່ຂອງທ່ານປະຈຸບັນ", distTitle: "ໄລຍະທາງ", timeTitle: "ເວລາເດີນທາງ", arriveTitle: "ເຖິງປະມານ", layerSat: "ດາວທຽມ", layerRoad: "ແຜນທີ່ຖະໜົນ", distUnit: "ກມ.", minUnit: "ນາທີ", hourUnit: "ຊົ່ວໂມງ", dayUnit: "ມື້", testVoiceBtn: "ທົດສອບສຽງ AI", searchPlaceholder: "ຄົ້ນຫາສະຖານທີ່ (ເຊັ່ນ: ປະຕູໄຊ)...", searchBtn: "ຄົ້ນຫາ", suggestionHeader: "ສະຖານທີ່ແນະນຳຍອດນິຍົມ", notFoundPlace: "ບໍ່ພົບສະຖານທີ່",
+                totalRouteSpeech: "เส้นทางที่จะไปทั้งหมด {dist} กิโลเมตร", rerouteSpeech: "ได้เปลี่ยนเส้นทางแล้ว เพื่อความว่องไวในการเดินทาง", testSpeech: "โบกี้เอไอ พร้อมใช้งานแล้วครับ",
+                selectedPlaceDefault: "ກະລຸນາຄລິກປັກໝຸດເທິງແຜນທີ່ ຫຼື ຄົ້ນຫາສະຖານທີ່", selectedPlaceLabel: "ປາຍທາງທີ່ເລືອກ", loadingPlace: "ກຳລັງໂຫຼດຊື່ສະຖານທີ່...",
+                detailTitle: "ລາຍລະອຽດກ່ຽວກັບບໍລິການຂອງພວກເຮົາ", detailP1: "ເວັບໄຊນີ້ສ້າງມາເພື່ອຄົນລາວ ແລະ ຊາວຕ່າງຊາດທີ່ມາທ່ອງທ່ຽວໃນປະເທດລາວ...", detailP2: "ພວກພວກເຮົາຍິນດີໃຫ້ບໍລິການຟຣີ...", detailQaQ: "ແລ້ວທ່ານຮູ້ໄດ້ຈັ່ງໃດວ່າໂອກາດຫຼົງຈະໜ້ອຍລົງ?", detailQaA: "ເພາະວ່າເວັບໄຊນີ້ສ້າງໂດຍຄົນລາວ 100% ຮ່ວມມືກັບບຸກຄົນທີ່ຮູ້ເສັ້ນທາງເປັນຢ່າງດີ", detailCreator: "ເວັບໄຊນີ້ສ້າງໂດຍ <strong>Vathsana Syhalath</strong>", detailContact: "ສະໜັບສະໜູນ ຫຼື ຕິດຕໍ່ສອບຖາມລາຍລະອຽດຕ່າງໆ ໄດ້ທີ່:",
+                totalText: "ຈຳນວນເງິນລວມທັງໝົດ:", donateBtnText: "ສະໜັບສະໜູນຄ່າກາເຟ / Donate", successAmountTitle: "ຈຳນວນເງິນ",
+                donateModalTitle: "ສະໜັບສະໜູນພວກເຮົາ", donateModalSub: "ກະລຸນາລະບຸຈຳນວນເງິນ LAK (ຂັ້ນຕໍ່າ 1,000)",
+                scanModalTitle: "ສະແກນເພື່ອສະໜັບສະໜູນ", scanModalSub: "ກະລຸນາສະແກນ QR Code ຜ່ານແອັບທະນາຄານຂອງທ່ານ",
+                genQrText: "ສ້າງຄິວອາໂຄຣ໌ (Generate QR)", qrLoadingText: "ກຳລັງສ້າງຄິວອາໂຄຣ໌...", amountLabel: "ຈຳນວນເງິນ", statusText: "ກຳລັງລໍຖ້າການຊຳລະເງິນ...",
+                expireText: "ຄິວອາໂຄຣ໌ຈະໝົດອາຍຸໃນ",
+                closeBtn: "ປິດໜ້າຕ່າງ", successTitle: "ສຳເລັດສົມບູນ ❤️🙏🏻", successSub: "ການຊຳລະເງິນສຳເລັດສົມບູນແລ້ວ"
             },
             th: {
-                brand: "Bogie Maps", subtitle: "ระบบนำทางอัจฉริยะตามถนนจริง", vehicleTitle: "เลือกรูปแบบการเดินทาง", instruction: "คลิกบนแผนที่เพื่อปักหมุด", car: "รถยนต์", moto: "มอเตอร์ไซค์", bicycle: "จักรยาน", walk: "เดิน/วิ่ง", resultTitle: "สรุปผลการนำทางตามถนนจริง", currentAddress: "ที่อยู่ของคุณปัจจุบัน", distTitle: "ระยะทาง", timeTitle: "เวลาเดินทาง", arriveTitle: "ถึงประมาณ", layerSat: "ดาวเทียม", layerRoad: "แผนที่ถนน", distUnit: "กม.", minUnit: "นาที", hourUnit: "ชั่วโมง", dayUnit: "วัน", testVoiceBtn: "ทดสอบเสียง AI", searchPlaceholder: "ค้นหาสถานที่...", searchBtn: "ค้นหา",
+                brand: "Bogie Maps", subtitle: "ระบบนำทางอัจฉริยะตามถนนจริง", vehicleTitle: "เลือกรูปแบบการเดินทาง", instruction: "คลิกบนแผนที่เพื่อปักหมุด", car: "รถยนต์", moto: "มอเตอร์ไซค์", bicycle: "จักรยาน", walk: "เดิน/วิ่ง", resultTitle: "สรุปผลการนำทางตามถนนจริง", currentAddress: "ที่อยู่ของคุณปัจจุบัน", distTitle: "ระยะทาง", timeTitle: "เวลาเดินทาง", arriveTitle: "ถึงประมาณ", layerSat: "ดาวเทียม", layerRoad: "แผนที่ถนน", distUnit: "กม.", minUnit: "นาที", hourUnit: "ชั่วโมง", dayUnit: "วัน", testVoiceBtn: "ทดสอบเสียง AI", searchPlaceholder: "ค้นหาสถานที่ (เช่น: ประตูชัย)...", searchBtn: "ค้นหา", suggestionHeader: "สถานที่แนะนำยอดนิยม", notFoundPlace: "ไม่พบสถานที่",
                 totalRouteSpeech: "เส้นทางที่จะไปทั้งหมด {dist} กิโลเมตร", rerouteSpeech: "ได้เปลี่ยนเส้นทางแล้ว เพื่อความไวในการเดินทาง", testSpeech: "โบกี้เอไอ พร้อมใช้งานแล้วครับ",
-                detailTitle: "รายละเอียดเกี่ยวกับบริการของเรา", detailP1: "เว็บไซต์นี้สร้างมาเพื่อคนลาวและชาวต่างชาติ...", detailP2: "พวกเรายินดีให้บริการฟรี...", detailQaQ: "แล้วคุณรู้ได้ไงว่าโอกาสหลงจะน้อยลง?", detailQaA: "เพราะว่าเว็บไซต์นี้สร้างโดยคนลาว 100% ร่วมมือกับบุคคลที่รู้เส้นทางเป็นอย่างดี", detailCreator: "เว็บไซต์นี้สร้างโดย <strong>Vathsana Syhalath</strong>", detailContact: "สนับสนุน หรือติดต่อสอบถามรายละเอียดต่างๆ ได้ที่:"
+                selectedPlaceDefault: "กรุณาคลิกปักหมุดบนแผนที่ หรือค้นหาสถานที่", selectedPlaceLabel: "จุดหมายปลายทางที่เลือก", loadingPlace: "กำลังโหลดชื่อสถานที่...",
+                detailTitle: "รายละเอียดเกี่ยวกับบริการของเรา", detailP1: "เว็บไซต์นี้สร้างมาเพื่อคนลาวและชาวต่างชาติ...", detailP2: "พวกเรายินดีให้บริการฟรี...", detailQaQ: "แล้วคุณรู้ได้ไงว่าโอกาสหลงจะน้อยลง?", detailQaA: "เพราะว่าเว็บไซต์นี้สร้างโดยคนลาว 100% ร่วมมือกับบุคคลที่รู้เส้นทางเป็นอย่างดี", detailCreator: "เว็บไซต์นี้สร้างโดย <strong>Vathsana Syhalath</strong>", detailContact: "สนับสนุน หรือติดต่อสอบถามรายละเอียดต่างๆ ได้ที่:",
+                totalText: "จำนวนเงินรวมทั้งหมด:", donateBtnText: "สนับสนุนค่ากาแฟ / Donate", successAmountTitle: "จำนวนเงิน",
+                donateModalTitle: "สนับสนุนพวกเรา", donateModalSub: "กรุณาระบุจำนวนเงิน LAK (ขั้นต่ำ 1,000)",
+                scanModalTitle: "สแกนเพื่อสนับสนุน", scanModalSub: "กรุณาสแกน QR Code ผ่านแอปธนาคารของคุณ",
+                genQrText: "สร้างคิวอาร์โค้ด (Generate QR)", qrLoadingText: "กำลังสร้างคิวอาร์โค้ด...", amountLabel: "จำนวนเงิน", statusText: "กำลังรอการชำระเงิน...",
+                expireText: "คิวอาร์โค้ดจะหมดอายุใน",
+                closeBtn: "ปิดหน้าต่าง", successTitle: "สำเร็จสมบูรณ์ ❤️🙏🏻", successSub: "การชำระเงินสำเร็จสมบูรณ์แล้ว"
             },
             en: {
-                brand: "Bogie Maps", subtitle: "Smart Navigation Pro", vehicleTitle: "Select Travel Mode", instruction: "Click on map to set destination", car: "Car", moto: "Moto", bicycle: "Bicycle", walk: "Walking", resultTitle: "Route Summary", currentAddress: "Your Current Location", distTitle: "Distance", timeTitle: "Duration", arriveTitle: "Est. Arrival", layerSat: "Satellite", layerRoad: "Street", distUnit: "km", minUnit: "mins", hourUnit: "hours", dayUnit: "days", testVoiceBtn: "Test AI Voice", searchPlaceholder: "Search location...", searchBtn: "Search",
+                brand: "Bogie Maps", subtitle: "Smart Navigation Pro", vehicleTitle: "Select Travel Mode", instruction: "Click on map to set destination", car: "Car", moto: "Moto", bicycle: "Bicycle", walk: "Walking", resultTitle: "Route Summary", currentAddress: "Your Current Location", distTitle: "Distance", timeTitle: "Duration", arriveTitle: "Est. Arrival", layerSat: "Satellite", layerRoad: "Street", distUnit: "km", minUnit: "mins", hourUnit: "hours", dayUnit: "days", testVoiceBtn: "Test AI Voice", searchPlaceholder: "Search location...", searchBtn: "Search", suggestionHeader: "Popular Locations", notFoundPlace: "Location not found",
                 totalRouteSpeech: "Total route distance is {dist} kilometers", rerouteSpeech: "Route updated for faster travel.", testSpeech: "Bogie AI is ready.",
-                detailTitle: "Details About Our Services", detailP1: "This website is built for Lao people and foreign tourists...", detailP2: "We are happy to provide free services...", detailQaQ: "How do you know the chance of getting lost will be minimized?", detailQaA: "Because this website is 100% created by Lao locals collaborating with route experts.", detailCreator: "This website was created by <strong>Vathsana Syhalath</strong>", detailContact: "Support or contact for inquiries at:"
+                selectedPlaceDefault: "Please click on the map to pin destination or search location", selectedPlaceLabel: "Selected Destination", loadingPlace: "Loading location name...",
+                detailTitle: "Details About Our Services", detailP1: "This website is built for Lao people and foreign tourists...", detailP2: "We are happy to provide free services...", detailQaQ: "How do you know the chance of getting lost will be minimized?", detailQaA: "Because this website is 100% created by Lao locals collaborating with route experts.", detailCreator: "This website was created by <strong>Vathsana Syhalath</strong>", detailContact: "Support or contact for inquiries at:",
+                totalText: "Total Amount:", donateBtnText: "Support Coffee / Donate", successAmountTitle: "Amount",
+                donateModalTitle: "Support Us", donateModalSub: "Please enter amount in LAK (Min 1,000)",
+                scanModalTitle: "Scan to Support", scanModalSub: "Please scan QR Code via your banking app",
+                genQrText: "Generate QR Code", qrLoadingText: "Generating QR Code...", amountLabel: "Amount", statusText: "Waiting for payment...",
+                expireText: "QR Code expires in",
+                closeBtn: "Close Window", successTitle: "Success ❤️🙏🏻", successSub: "Payment completed successfully"
             },
             zh: {
-                brand: "Bogie Maps", subtitle: "智能导航系统", vehicleTitle: "选择出行方式", instruction: "点击地图设置目的地", car: "汽车", moto: "摩托车", bicycle: "自行车", walk: "步行", resultTitle: "路线总结", currentAddress: "您的当前位置", distTitle: "距离", timeTitle: "耗时", arriveTitle: "预计到达", layerSat: "卫星地图", layerRoad: "街道地图", distUnit: "公里", minUnit: "分钟", hourUnit: "小时", dayUnit: "天", testVoiceBtn: "测试语音", searchPlaceholder: "搜索地点...", searchBtn: "搜索",
+                brand: "Bogie Maps", subtitle: "智能导航系统", vehicleTitle: "选择出行方式", instruction: "点击地图设置目的地", car: "汽车", moto: "摩托车", bicycle: "自行车", walk: "步行", resultTitle: "路线总结", currentAddress: "您的当前位置", distTitle: "距离", timeTitle: "耗时", arriveTitle: "预计到达", layerSat: "卫星地图", layerRoad: "街道地图", distUnit: "公里", minUnit: "分钟", hourUnit: "小时", dayUnit: "天", testVoiceBtn: "测试语音", searchPlaceholder: "搜索地点...", searchBtn: "搜索", suggestionHeader: "热门推荐地点", notFoundPlace: "未找到地点",
                 totalRouteSpeech: "总路线距离为 {dist} 公里", rerouteSpeech: "已重新规划路线以加快行程。", testSpeech: "Bogie AI 已准备就绪。",
-                detailTitle: "关于我们的服务详情", detailP1: "本网站专为老挝本地人及来老挝旅游...", detailP2: "我们很高兴提供免费服务...", detailQaQ: "你们怎么知道迷路几率会降低？", detailQaA: "因为本网站由老挝本地人100%打造，并与熟悉路线的专家合作开发。", detailCreator: "本网站由 <strong>Vathsana Syhalath</strong> 创建", detailContact: "支持或联系咨询请通过："
-            },
-            vi: {
-                brand: "Bogie Maps", subtitle: "Hệ thống định vị thông minh", vehicleTitle: "Chọn phương tiện", instruction: "Nhấp vào bản đồ để chọn điểm đến", car: "Ô tô", moto: "Xe máy", bicycle: "Xe đạp", walk: "Đi bộ", resultTitle: "Tóm tắt lộ trình", currentAddress: "Vị trí hiện tại của bạn", distTitle: "Khoảng cách", timeTitle: "Thời gian", arriveTitle: "Dự kiến đến", layerSat: "Vệ tinh", layerRoad: "Đường phố", distUnit: "km", minUnit: "phút", hourUnit: "giờ", dayUnit: "ngày", testVoiceBtn: "Thử giọng", searchPlaceholder: "Tìm kiếm...", searchBtn: "Tìm",
-                totalRouteSpeech: "Tổng khoảng cách tuyến đường là {dist} ki lô mét", rerouteSpeech: "Đã thay đổi lộ trình.", testSpeech: "Hệ thống Bogie AI đã sẵn sàng.",
-                detailTitle: "Chi tiết về dịch vụ", detailP1: "Trang web này được xây dựng cho người Lào và khách du lịch...", detailP2: "Chúng tôi rất hân hạnh cung cấp dịch vụ...", detailQaQ: "Làm thế nào bạn biết khả năng lạc đường sẽ ít đi?", detailQaA: "Vì trang web này được tạo ra 100% bởi người Lào, hợp tác với các chuyên gia am hiểu rất rõ về các cung đường.", detailCreator: "Trang web này được tạo bởi <strong>Vathsana Syhalath</strong>", detailContact: "Hỗ trợ hoặc liên hệ giải đáp thắc mắc tại:"
-            },
-            ja: {
-                brand: "Bogie Maps", subtitle: "スマートナビゲーション", vehicleTitle: "移動手段を選択", instruction: "地図をクリックして目的地を設定", car: "車", moto: "バイク", bicycle: "自転車", walk: "徒歩", resultTitle: "ルート概要", currentAddress: "現在地", distTitle: "距離", timeTitle: "所要時間", arriveTitle: "到着予定", layerSat: "衛星写真", layerRoad: "道路地図", distUnit: "km", minUnit: "分", hourUnit: "時間", dayUnit: "日", testVoiceBtn: "音声テスト", searchPlaceholder: "場所を検索...", searchBtn: "検索",
-                totalRouteSpeech: "全ルートの距離は {dist} キロです", rerouteSpeech: "ルートを変更しました。", testSpeech: "Bogie AI 準備完了です。",
-                detailTitle: "サービス詳細", detailP1: "このウェブサイトは観光客のために作られました...", detailP2: "無料サービスを提供しています。", detailQaQ: "なぜ迷子になる確率が低くなると言えるのですか？", detailQaA: "このウェブサイトは100%ラオス人によって作られており、道順を熟知した専門家と協力して開発したためです。", detailCreator: "このウェブサイトは <strong>Vathsana Syhalath</strong> によって作成されました", detailContact: "サポートまたはお問い合わせ："
-            },
-            ko: {
-                brand: "Bogie Maps", subtitle: "스마트 내비게이션", vehicleTitle: "이동 수단", instruction: "목적지 클릭", car: "자동차", moto: "오토바이", bicycle: "자전거", walk: "도보", resultTitle: "경로 요약", currentAddress: "현재 위치", distTitle: "거리", timeTitle: "시간", arriveTitle: "예상 도착", layerSat: "위성", layerRoad: "일반", distUnit: "km", minUnit: "분", hourUnit: "시간", dayUnit: "일", testVoiceBtn: "음성 테스트", searchPlaceholder: "검색...", searchBtn: "검색",
-                totalRouteSpeech: "총 거리 {dist} 킬로미터", rerouteSpeech: "경로 변경됨", testSpeech: "준비 완료",
-                detailTitle: "서비스 상세", detailP1: "관광객을 위한 서비스...", detailP2: "무료 제공", detailQaQ: "길을 잃을 확률이 줄어든다고 확신하는 이유는 무엇인가요?", detailQaA: "이 웹사이트는 100% 라오스 현지인들이 경로 전문가들과 협력하여 제작했기 때문입니다.", detailCreator: "이 웹사이트는 <strong>Vathsana Syhalath</strong>에 의해 제작되었습니다", detailContact: "지원 연락처:"
+                selectedPlaceDefault: "请点击地图设置目的地或搜索地点", selectedPlaceLabel: "所选目的地", loadingPlace: "正在加载地点名称...",
+                detailTitle: "关于我们的服务详情", detailP1: "本网站专为老挝本地人及来老挝旅游...", detailP2: "我们很高兴提供免费服务...", detailQaQ: "你们怎么知道迷路几率会降低？", detailQaA: "因为本网站由老挝本地人100%打造，并与熟悉路线的专家合作开发。", detailCreator: "本网站由 <strong>Vathsana Syhalath</strong> 创建", detailContact: "支持或联系咨询请通过：",
+                totalText: "总金额:", donateBtnText: "支持咖啡 / Donate", successAmountTitle: "金额",
+                donateModalTitle: "支持我们", donateModalSub: "请输入老挝基普金额 (最低 1,000)",
+                scanModalTitle: "扫码支持", scanModalSub: "请使用您的银行应用扫描二维码",
+                genQrText: "生成二维码 (Generate QR)", qrLoadingText: "正在生成二维码...", amountLabel: "金额", statusText: "正在等待支付...",
+                expireText: "二维码将在",
+                closeBtn: "关闭窗口", successTitle: "支付成功 ❤️🙏🏻", successSub: "支付已成功完成"
             },
             hi: {
-                brand: "Bogie Maps", subtitle: "स्मार्ट नेविगेशन", vehicleTitle: "वाहन", instruction: "क्लिक करें", car: "कार", moto: "मोटरसाइकिल", bicycle: "साइकिल", walk: "पैदल", resultTitle: "रूट सारांश", currentAddress: "वर्तमान स्थान", distTitle: "दूरी", timeTitle: "समय", arriveTitle: "आगमन", layerSat: "उपग्रह", layerRoad: "सड़क", distUnit: "किमी", minUnit: "मिनट", hourUnit: "घंटे", dayUnit: "दिन", testVoiceBtn: "परीक्षण", searchPlaceholder: "खोजें...", searchBtn: "खोज",
-                totalRouteSpeech: "कुल दूरी {dist} किमी", rerouteSpeech: "रूट अपडेट", testSpeech: "तैयार",
-                detailTitle: "विवरण", detailP1: "पर्यटकों के लिए...", detailP2: "मुफ्त सेवा", detailQaQ: "आप कैसे जानते हैं कि भटकने की संभावना कम हो जाएगी?", detailQaA: "क्योंकि यह वेबसाइट 100% लाओस के स्थानीय लोगों द्वारा मार्ग विशेषज्ञों के सहयोग से बनाई गई है।", detailCreator: "यह वेबसाइट <strong>Vathsana Syhalath</strong> द्वारा बनाई गई है", detailContact: "संपर्क करें:"
-            },
-            fr: {
-                brand: "Bogie Maps", subtitle: "Navigation Intelligente", vehicleTitle: "Mode de transport", instruction: "Cliquez pour définir", car: "Voiture", moto: "Moto", bicycle: "Vélo", walk: "Marche", resultTitle: "Résumé de l'itinéraire", currentAddress: "Position actuelle", distTitle: "Distance", timeTitle: "Durée", arriveTitle: "Arrivée est.", layerSat: "Satellite", layerRoad: "Plan", distUnit: "km", minUnit: "min", hourUnit: "h", dayUnit: "j", testVoiceBtn: "Test Voix", searchPlaceholder: "Rechercher...", searchBtn: "Chercher",
-                totalRouteSpeech: "Distance totale {dist} km", rerouteSpeech: "Itinéraire mis à jour", testSpeech: "Prêt",
-                detailTitle: "Détails", detailP1: "Service pour tous...", detailP2: "Gratuit", detailQaQ: "Comment savez-vous que les risques de se perdre sont minimes?", detailQaA: "Parce que ce site web a été créé à 100% par des habitants du Laos en collaboration avec des experts en itinéraires.", detailCreator: "Créé par <strong>Vathsana Syhalath</strong>", detailContact: "Contact :"
-            },
-            de: {
-                brand: "Bogie Maps", subtitle: "Smart Navigation", vehicleTitle: "Fortbewegungsmittel", instruction: "Klicken zum Markieren", car: "Auto", moto: "Motorrad", bicycle: "Fahrrad", walk: "Gehen", resultTitle: "Routenübersicht", currentAddress: "Aktueller Standort", distTitle: "Entfernung", timeTitle: "Dauer", arriveTitle: "Ankunft", layerSat: "Satellit", layerRoad: "Straße", distUnit: "km", minUnit: "Min.", hourUnit: "Std.", dayUnit: "Tage", testVoiceBtn: "Sprachtest", searchPlaceholder: "Suchen...", searchBtn: "Suchen",
-                totalRouteSpeech: "Gesamtstrecke {dist} km", rerouteSpeech: "Route aktualisiert", testSpeech: "Bereit",
-                detailTitle: "Details", detailP1: "Für Touristen...", detailP2: "Kostenlos", detailQaQ: "Woher wissen Sie, dass die Wahrscheinlichkeit, sich zu verirren, gering ist?", detailQaA: "Weil diese Website zu 100 % von Einheimischen aus Laos in Zusammenarbeit mit Routenexperten erstellt wurde.", detailCreator: "Erstellt von <strong>Vathsana Syhalath</strong>", detailContact: "Kontakt:"
-            },
-            ru: {
-                brand: "Bogie Maps", subtitle: "Умная навигация", vehicleTitle: "Транспорт", instruction: "Кликните на карту", car: "Авто", moto: "Мото", bicycle: "Велосипед", walk: "Пешком", resultTitle: "Маршрут", currentAddress: "Текущий адрес", distTitle: "Расстояние", timeTitle: "Время", arriveTitle: "Прибытие", layerSat: "Спутник", layerRoad: "Карта", distUnit: "км", minUnit: "мин", hourUnit: "ч", dayUnit: "дн", testVoiceBtn: "Тест", searchPlaceholder: "Поиск...", searchBtn: "Искать",
-                totalRouteSpeech: "Общее расстояние {dist} км", rerouteSpeech: "Маршрут обновлен", testSpeech: "Готово",
-                detailTitle: "О сервисе", detailP1: "Для туристов...", detailP2: "Бесплатно", detailQaQ: "Откуда вы знаете, что шанс заблудиться минимален?", detailQaA: "Потому что этот сайт на 100% создан местными жителями Лаоса в сотрудничестве с экспертами по маршрутам.", detailCreator: "Создатель: <strong>Vathsana Syhalath</strong>", detailContact: "Контакты:"
-            },
-            es: {
-                brand: "Bogie Maps", subtitle: "Navegación Inteligente", vehicleTitle: "Modo de viaje", instruction: "Haga clic en el mapa", car: "Coche", moto: "Moto", bicycle: "Bicicleta", walk: "A pie", resultTitle: "Resumen de ruta", currentAddress: "Ubicación actual", distTitle: "Distancia", timeTitle: "Duración", arriveTitle: "Llegada est.", layerSat: "Satélite", layerRoad: "Calle", distUnit: "km", minUnit: "min", hourUnit: "h", dayUnit: "días", testVoiceBtn: "Probar voz", searchPlaceholder: "Buscar...", searchBtn: "Buscar",
-                totalRouteSpeech: "Distancia total {dist} km", rerouteSpeech: "Ruta actualizada", testSpeech: "Listo",
-                detailTitle: "Detalles", detailP1: "Creado para turistas...", detailP2: "Servicio gratuito", detailQaQ: "¿Cómo sabes que la posibilidad de perderte será mínima?", detailQaA: "Porque este sitio web fue creado 100% por lugareños de Laos в colaboración con expertos en rutas.", detailCreator: "Creado por <strong>Vathsana Syhalath</strong>", detailContact: "Contacto:"
-            },
-            id: {
-                brand: "Bogie Maps", subtitle: "Navigasi Pintar", vehicleTitle: "Pilih Moda", instruction: "Klik di peta", car: "Mobil", moto: "Motor", bicycle: "Sepeda", walk: "Jalan", resultTitle: "Ringkasan Rute", currentAddress: "Lokasi Anda", distTitle: "Jarak", timeTitle: "Durasi", arriveTitle: "Estimasi Tiba", layerSat: "Satelit", layerRoad: "Jalan", distUnit: "km", minUnit: "menit", hourUnit: "jam", dayUnit: "hari", testVoiceBtn: "Tes Suara", searchPlaceholder: "Cari...", searchBtn: "Cari",
-                totalRouteSpeech: "Total jarak {dist} km", rerouteSpeech: "Rute diperbarui", testSpeech: "Siap",
-                detailTitle: "Detail", detailP1: "Untuk pelancong...", detailP2: "Layanan gratis", detailQaQ: "Bagaimana Anda tahu peluang tersesat akan berkurang?", detailQaA: "Karena situs web ini 100% dibuat oleh warga lokal Laos yang bekerja sama dengan para ahli rute.", detailCreator: "Dibuat oleh <strong>Vathsana Syhalath</strong>", detailContact: "Kontak:"
-            },
-            ms: {
-                brand: "Bogie Maps", subtitle: "Navigasi Pintar", vehicleTitle: "Pilih Mod", instruction: "Klik pada peta", car: "Kereta", moto: "Motosikal", bicycle: "Basikal", walk: "Jalan Kaki", resultTitle: "Ringkasan", currentAddress: "Lokasi Semasa", distTitle: "Jarak", timeTitle: "Masa", arriveTitle: "Tiba", layerSat: "Satelit", layerRoad: "Jalan", distUnit: "km", minUnit: "minit", hourUnit: "jam", dayUnit: "hari", testVoiceBtn: "Uji Suara", searchPlaceholder: "Cari...", searchBtn: "Cari",
-                totalRouteSpeech: "Jumlah jarak {dist} km", rerouteSpeech: "Laluan dikemas kini", testSpeech: "Sedia",
-                detailTitle: "Butiran", detailP1: "For tourists...", detailP2: "Free service", detailQaQ: "Bagaimanakah anda tahu peluang untuk tersesat akan berkurangan?", detailQaA: "Kerana laman web ini 100% dicipta oleh penduduk tempatan Laos yang bekerjasama dengan pakar laluan.", detailCreator: "Dicipta oleh <strong>Vathsana Syhalath</strong>", detailContact: "Hubungi:"
+                brand: "Bogie Maps", subtitle: "स्मार्ट नेविगेशन", vehicleTitle: "यात्रा मोड चुनें", instruction: "गंतव्य निर्धारित करने के लिए मानचित्र पर क्लिक करें", car: "कार", moto: "मोटरसाइकिल", bicycle: "साइकिल", walk: "पैदल", resultTitle: "मार्ग सारांश", currentAddress: "आपका वर्तमान स्थान", distTitle: "दूरी", timeTitle: "अवधि", arriveTitle: "अनुमानित आगमन", layerSat: "सैटेलाइट", layerRoad: "सड़क", distUnit: "किमी", minUnit: "मिनट", hourUnit: "घंटे", dayUnit: "दिन", testVoiceBtn: "आवाज परीक्षण", searchPlaceholder: "स्थान खोजें...", searchBtn: "खोज", suggestionHeader: "लोकप्रिय स्थान", notFoundPlace: "स्थान नहीं मिला",
+                totalRouteSpeech: "कुल मार्ग की दूरी {dist} किलोमीटर है", rerouteSpeech: "तेजी से यात्रा के लिए मार्ग अपडेट किया गया।", testSpeech: "बोकी एआई तैयार है।",
+                selectedPlaceDefault: "कृपया गंतव्य पिन करने या स्थान खोजने के लिए मानचित्र पर क्लिक करें", selectedPlaceLabel: "चयनित गंतव्य", loadingPlace: "स्थान का नाम लोड हो रहा है...",
+                detailTitle: "हमारी सेवाओं के बारे में विवरण", detailP1: "यह वेबसाइट लाओस के लोगों और विदेशी पर्यटकों के लिए बनाई गई है...", detailP2: "हम मुफ्त सेवाएं प्रदान करने में प्रसन्न हैं...", detailQaQ: "आप कैसे जानते हैं कि खो जाने की संभावना कम हो जाएगी?", detailQaA: "क्योंकि यह वेबसाइट 100% लाओ स्थानीय लोगों द्वारा मार्ग विशेषज्ञों के सहयोग से बनाई गई है।", detailCreator: "यह वेबसाइट <strong>Vathsana Syhalath</strong> द्वारा बनाई गई है", detailContact: "समर्थन या पूछताछ के लिए संपर्क करें:",
+                totalText: "कुल राशि:", donateBtnText: "कॉफी का समर्थन करें / Donate", successAmountTitle: "राशि",
+                donateModalTitle: "हमारा समर्थन करें", donateModalSub: "कृपया LAK में राशि दर्ज करें (न्यूनतम 1,000)",
+                scanModalTitle: "समर्थन के लिए स्कैन करें", scanModalSub: "कृपया अपने बैंकिंग ऐप से क्यूआर कोड स्कैन करें",
+                genQrText: "क्यूआर कोड जेनरेट करें", qrLoadingText: "क्यूआर कोड जेनरेट हो रहा है...", amountLabel: "राशि", statusText: "भुगतान की प्रतीक्षा है...",
+                expireText: "क्यूआर कोड समाप्त हो जाएगा",
+                closeBtn: "विंडो बंद करें", successTitle: "सफलता ❤️🙏🏻", successSub: "भुगतान सफलतापूर्वक पूरा हुआ"
             }
         };
+
+        translations.vi = {
+            ...translations.en,
+            brand: "Bogie Maps", subtitle: "Hệ thống điều hướng thông minh", vehicleTitle: "Chọn phương tiện", instruction: "Nhấp vào bản đồ để chọn điểm đến", car: "Ô tô", moto: "Xe máy", bicycle: "Xe đạp", walk: "Đi bộ", resultTitle: "Tóm tắt tuyến đường", currentAddress: "Vị trí hiện tại", distTitle: "Khoảng cách", timeTitle: "Thời gian", arriveTitle: "Dự kiến đến", layerSat: "Vệ tinh", layerRoad: "Đường phố", distUnit: "km", minUnit: "phút", hourUnit: "giờ", dayUnit: "ngày", testVoiceBtn: "Kiểm tra giọng nói", searchPlaceholder: "Tìm kiếm địa điểm...", searchBtn: "Tìm kiếm", suggestionHeader: "Địa điểm phổ biến", notFoundPlace: "Không tìm thấy địa điểm",
+            totalRouteSpeech: "Tổng khoảng cách tuyến đường là {dist} ki-lô-mét", rerouteSpeech: "Đã cập nhật tuyến đường để di chuyển nhanh hơn.", testSpeech: "Bogie AI đã sẵn sàng.",
+            selectedPlaceDefault: "Vui lòng nhấp vào bản đồ để chọn điểm đến hoặc tìm kiếm", selectedPlaceLabel: "Điểm đến đã chọn", loadingPlace: "Đang tải tên địa điểm..."
+        };
+
+        translations.ja = { ...translations.en };
+        translations.ko = { ...translations.en };
+        translations.fr = { ...translations.en };
+        translations.de = { ...translations.en };
+        translations.ru = { ...translations.en };
+        translations.es = { ...translations.en };
+        translations.id = { ...translations.en };
+        translations.ms = { ...translations.en };
 
         let streetLayer, satelliteLayer;
 
@@ -456,6 +711,7 @@
             changeLanguage('lo', 'ລາວ', 'la');
             requestInitialLocation();
             renderSuggestions(popularLocations);
+            updateDonationTotalDisplay();
         }
 
         function requestInitialLocation() {
@@ -483,9 +739,6 @@
                     },
                     (error) => {
                         console.warn("Geolocation permission error: ", error.message);
-                        // แจ้งเตือนผู้ใช้กรณีที่เบราว์เซอร์ไม่อนุญาตสิทธิ์ตำแหน่ง
-                        alert("กรุณาเปิดอนุญาตสิทธิ์การเข้าถึงตำแหน่ง GPS ในการตั้งค่าเบราว์เซอร์ เพื่อให้ระบบปักหมุดตรงตำแหน่งจริงของคุณ");
-                        
                         userCoords = [17.9757, 102.6331];
                         userMarker = L.marker(userCoords).addTo(map);
                         map.setView(userCoords, 14);
@@ -494,7 +747,7 @@
                     { enableHighAccuracy: true, timeout: 15000, maximumAge: 0 }
                 );
             } else {
-                alert("เบຣາວ໌ເຊີຂອງທ່ານບໍ່ຮອງຮັບການລະບຸຕຳແໜ່ງ GPS");
+                alert("ເບຣາວ໌ເຊີຂອງທ່ານບໍ່ຮອງຮັບການລະບຸຕຳແໜ່ງ GPS");
             }
         }
 
@@ -535,8 +788,9 @@
         function renderSuggestions(list) {
             const listContainer = document.getElementById('suggestions-list');
             listContainer.innerHTML = '';
+            const t = translations[currentLang] || translations['en'];
             if (list.length === 0) {
-                listContainer.innerHTML = `<div class="px-3 py-2 text-xs text-gray-400">ບໍ່ພົບສະຖານທີ່</div>`;
+                listContainer.innerHTML = `<div class="px-3 py-2 text-xs text-gray-400">${t.notFoundPlace}</div>`;
                 return;
             }
             list.forEach(loc => {
@@ -559,33 +813,98 @@
             }
         }
 
+        function filterStrictLanguageText(text, lang) {
+            if (!text) return text;
+            let parts = text.split(',').map(p => p.trim());
+            
+            const thaiRegex = /[\u0E00-\u0E7F]/;
+            const laoRegex = /[\u0E80-\u0EFF]/;
+            const chineseRegex = /[\u4e00-\u9fa5]/;
+            const hindiRegex = /[\u0900-\u097F]/;
+
+            let filteredParts = parts.filter(part => {
+                if (lang === 'zh') {
+                    return !thaiRegex.test(part) && !laoRegex.test(part);
+                } else if (lang === 'hi') {
+                    return !thaiRegex.test(part) && !laoRegex.test(part);
+                } else if (lang === 'lo') {
+                    return !thaiRegex.test(part);
+                } else if (lang === 'th') {
+                    return !laoRegex.test(part);
+                }
+                return true;
+            });
+
+            if (filteredParts.length > 0) {
+                return filteredParts.join(', ');
+            }
+            return text;
+        }
+
         function searchLocation() {
             const query = document.getElementById('search-input').value.trim();
             if (!query) return;
 
             document.getElementById('suggestions-box').classList.add('hidden');
             unlockSpeech();
-            const url = `https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(query)}`;
+            
+            let nominatimLang = currentLang;
+            if (currentLang === 'lo') nominatimLang = 'lo';
+            else if (currentLang === 'th') nominatimLang = 'th';
+            else if (currentLang === 'zh') nominatimLang = 'zh-CN';
+            else if (currentLang === 'hi') nominatimLang = 'hi';
+            else if (currentLang === 'en') nominatimLang = 'en';
+
+            const url = `https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(query)}&accept-language=${nominatimLang}`;
 
             fetch(url)
                 .then(response => response.json())
                 .then(data => {
+                    const t = translations[currentLang] || translations['en'];
                     if (data && data.length > 0) {
                         const lat = parseFloat(data[0].lat);
                         const lon = parseFloat(data[0].lon);
                         
                         map.setView([lat, lon], 16, { animate: true });
-                        setDestination(lat, lon);
+                        let cleanName = filterStrictLanguageText(data[0].display_name, currentLang);
+                        setDestination(lat, lon, cleanName);
                     } else {
-                        alert("ไม่พบสถานที่ที่คุณค้นหา กรุณาลองใหม่อีกครั้ง");
+                        alert(t.notFoundPlace);
                     }
                 })
                 .catch(err => {
                     console.error("Search error:", err);
-                    alert("เกิดข้อผิดพลาดในการค้นหาสถานที่");
                 });
         }
 
+        async function fetchPlaceName(lat, lng) {
+            const placeNameEl = document.getElementById('txt-selected-place-name');
+            const t = translations[currentLang] || translations['en'];
+            placeNameEl.innerText = t.loadingPlace;
+
+            try {
+                let nominatimLang = currentLang;
+                if (currentLang === 'lo') nominatimLang = 'lo';
+                else if (currentLang === 'th') nominatimLang = 'th';
+                else if (currentLang === 'zh') nominatimLang = 'zh-CN';
+                else if (currentLang === 'hi') nominatimLang = 'hi';
+                else if (currentLang === 'en') nominatimLang = 'en';
+
+                const response = await fetch(`https://nominatim.openstreetmap.org/reverse?format=json&lat=${lat}&lon=${lng}&accept-language=${nominatimLang}`);
+                const data = await response.json();
+                if (data && data.display_name) {
+                    let cleanName = filterStrictLanguageText(data.display_name, currentLang);
+                    placeNameEl.innerText = cleanName;
+                } else {
+                    placeNameEl.innerText = `Lat: ${lat.toFixed(4)}, Lng: ${lng.toFixed(4)}`;
+                }
+            } catch (error) {
+                console.error("Reverse geocoding error:", error);
+                placeNameEl.innerText = `Lat: ${lat.toFixed(4)}, Lng: ${lng.toFixed(4)}`;
+            }
+        }
+
+        // 🔴 ระบบจัดการเสียงพูด: ถ้าเว็บเป็นภาษาลาว (lo) จะให้อ่านออกเสียงเป็นภาษาไทย (th-TH) ทันที
         function speakSiri(text, priority = false) {
             if (!('speechSynthesis' in window)) return;
             unlockSpeech();
@@ -594,10 +913,9 @@
                 window.speechSynthesis.cancel();
                 speechQueue = [];
                 isSpeaking = false;
-                setTimeout(() => {
-                    speechQueue.push(text);
-                    processSpeechQueue();
-                }, 100);
+            }
+
+            if (speechQueue.includes(text) || (isSpeaking && speechQueue[speechQueue.length - 1] === text)) {
                 return;
             }
 
@@ -612,14 +930,44 @@
             const textToSpeak = speechQueue.shift();
             const utterance = new SpeechSynthesisUtterance(textToSpeak);
 
-            const langMap = { lo: 'th-TH', th: 'th-TH', en: 'en-US', zh: 'zh-CN', vi: 'vi-VN', ja: 'ja-JP', ko: 'ko-KR', hi: 'hi-IN', fr: 'fr-FR', de: 'de-DE', ru: 'ru-RU', es: 'es-ES', id: 'id-ID', ms: 'ms-MY' };
-            utterance.lang = langMap[currentLang] || 'th-TH';
+            let langCode = 'th-TH';
+            if (currentLang === 'lo') {
+                langCode = 'th-TH'; // 🟢 บังคับให้เว็บภาษาลาว อ่านออกเสียงเป็นภาษาไทย
+            } else if (currentLang === 'th') {
+                langCode = 'th-TH';
+            } else if (currentLang === 'zh') {
+                langCode = 'zh-CN';
+            } else if (currentLang === 'hi') {
+                langCode = 'hi-IN';
+            } else if (currentLang === 'en') {
+                langCode = 'en-US';
+            } else if (currentLang === 'vi') {
+                langCode = 'vi-VN';
+            } else if (currentLang === 'ja') {
+                langCode = 'ja-JP';
+            } else if (currentLang === 'ko') {
+                langCode = 'ko-KR';
+            } else if (currentLang === 'fr') {
+                langCode = 'fr-FR';
+            } else if (currentLang === 'de') {
+                langCode = 'de-DE';
+            } else if (currentLang === 'ru') {
+                langCode = 'ru-RU';
+            } else if (currentLang === 'es') {
+                langCode = 'es-ES';
+            } else if (currentLang === 'id') {
+                langCode = 'id-ID';
+            } else if (currentLang === 'ms') {
+                langCode = 'ms-MY';
+            }
+
+            utterance.lang = langCode;
             utterance.rate = 1.0;
             utterance.pitch = 1.0;
 
             utterance.onend = function() {
                 isSpeaking = false;
-                setTimeout(processSpeechQueue, 100);
+                setTimeout(processSpeechQueue, 200);
             };
 
             utterance.onerror = function() {
@@ -632,7 +980,8 @@
 
         function testVoiceAI() {
             const t = translations[currentLang] || translations['en'];
-            speakSiri(t.testSpeech, true);
+            const speechText = t.testSpeech || "Bogie AI is ready.";
+            speakSiri(speechText, true);
         }
 
         function toggleMapLayer() {
@@ -690,7 +1039,15 @@
             document.getElementById('lbl-test-voice').innerText = t.testVoiceBtn;
             document.getElementById('search-input').placeholder = t.searchPlaceholder;
             document.getElementById('lbl-search-btn').innerText = t.searchBtn;
+            document.getElementById('lbl-suggestion-header').innerText = t.suggestionHeader;
             
+            document.getElementById('lbl-selected-place-title').innerText = t.selectedPlaceLabel;
+            if (!destCoords) {
+                document.getElementById('txt-selected-place-name').innerText = t.selectedPlaceDefault;
+            } else {
+                fetchPlaceName(destCoords[0], destCoords[1]);
+            }
+
             document.getElementById('lbl-detail-title').innerText = t.detailTitle;
             document.getElementById('detail-p1').innerText = t.detailP1;
             document.getElementById('detail-p2').innerText = t.detailP2;
@@ -698,6 +1055,19 @@
             document.getElementById('detail-qa-ans-text').innerText = t.detailQaA;
             document.getElementById('detail-creator').innerHTML = t.detailCreator;
             document.getElementById('detail-contact').innerText = t.detailContact;
+
+            document.getElementById('lbl-total-text').innerText = t.totalText;
+            document.getElementById('lbl-donate-btn').innerText = t.donateBtnText;
+            document.getElementById('lbl-success-amount-title').innerText = t.successAmountTitle;
+
+            document.getElementById('donate-modal-title').innerText = t.donateModalTitle;
+            document.getElementById('donate-modal-subtitle').innerText = t.donateModalSub;
+            document.getElementById('lbl-gen-qr-text').innerText = t.genQrText;
+            document.getElementById('lbl-qr-loading').innerText = t.qrLoadingText;
+            document.getElementById('lbl-amount-label').innerText = t.amountLabel;
+            document.getElementById('lbl-status-text').innerText = t.statusText;
+            document.getElementById('lbl-expire-text').innerText = t.expireText;
+            document.getElementById('lbl-close-btn').innerText = t.closeBtn;
 
             document.querySelectorAll('.dist-unit').forEach(el => el.innerText = t.distUnit);
             
@@ -763,25 +1133,32 @@
             }
         }
 
-        function setDestination(lat, lng) {
+        function setDestination(lat, lng, customName = null) {
             destCoords = [lat, lng];
 
             if (!destMarker) {
                 const destIcon = L.divIcon({
                     className: 'custom-dest-marker',
-                    html: `<div class="w-8 h-8 bg-red-500 rounded-full border-2 border-white shadow-xl flex items-center justify-center text-white"><i class="fa-solid fa-location-dot"></i></div>`,
-                    iconSize: [32, 32],
-                    iconAnchor: [16, 32]
+                    html: `<div class="text-red-600 text-3xl drop-shadow-md flex items-center justify-center" style="transform: translate(-12px, -28px);"><i class="fa-solid fa-location-dot"></i></div>`,
+                    iconSize: [24, 24],
+                    iconAnchor: [12, 24]
                 });
                 destMarker = L.marker(destCoords, { icon: destIcon, draggable: true }).addTo(map);
                 
                 destMarker.on('dragend', function(event) {
                     const pos = event.target.getLatLng();
                     destCoords = [pos.lat, pos.lng];
+                    fetchPlaceName(pos.lat, pos.lng);
                     calculateRoute(false);
                 });
             } else {
                 destMarker.setLatLng(destCoords);
+            }
+
+            if (customName) {
+                document.getElementById('txt-selected-place-name').innerText = customName;
+            } else {
+                fetchPlaceName(lat, lng);
             }
 
             calculateRoute(false);
@@ -876,10 +1253,14 @@
                     document.getElementById('txt-distance').innerHTML = `${formattedDist} <span class="dist-unit">${t.distUnit}</span>`;
                     document.getElementById('txt-arrival').innerText = arrivalTimeStr;
 
+                    const tObj = translations[currentLang] || translations['en'];
+                    let speechText = (tObj.totalRouteSpeech || "Total distance is {dist} kilometers").replace("{dist}", formattedDist);
+                    let rerouteText = tObj.rerouteSpeech || "Route updated.";
+
                     if (!isAutoReroute) {
-                        speakSiri(t.totalRouteSpeech.replace('{dist}', formattedDist), true);
+                        speakSiri(speechText, true);
                     } else if (previousDistanceKm !== null && distanceKm < previousDistanceKm - 0.05) {
-                        speakSiri(t.rerouteSpeech, true);
+                        speakSiri(rerouteText, true);
                     }
 
                     previousDistanceKm = distanceKm;
@@ -918,6 +1299,7 @@
             updateDurationDisplay(0);
             document.getElementById('txt-arrival').innerText = '-';
             document.getElementById('search-input').value = '';
+            document.getElementById('txt-selected-place-name').innerText = t.selectedPlaceDefault;
             document.getElementById('suggestions-box').classList.add('hidden');
         }
 
