@@ -178,7 +178,7 @@
             </div>
         </div>
 
-        <!-- 🔴 ส่วนแสดงชื่อสถานที่/บ้าน/แขວງ ຢູ່ใต้แผนที่ -->
+        <!-- Destination Info Card -->
         <div id="destination-info-card" class="white-card px-3.5 py-2.5 rounded-2xl flex items-center space-x-3 shadow-sm border border-red-100 shrink-0">
             <div class="text-red-600 text-xl shrink-0 flex items-center justify-center pl-0.5">
                 <i class="fa-solid fa-location-dot"></i>
@@ -264,7 +264,7 @@
                 
                 <div id="detail-content" class="hidden px-4 pb-4 pt-1 text-xs text-gray-600 leading-relaxed border-t border-gray-100 space-y-2.5">
                     <p id="detail-p1">ເວັບໄຊນີ້ສ້າງມາເພື່ອຄົນລາວ ແລະ ຊາວຕ່າງຊາດທີ່ມາທ່ອງທ່ຽວໃນປະເທດລາວ ແຕ່ບໍ່ຮູ້ວ່າຕ້ອງເລີ່ມໄປທີ່ໃດກ່ອນໃນລາວ ແລະ ສະຖານທີ່ທ່ອງທ່ຽວ ແລະ ເບິ່ງສະຖານທີ່ໃຫ້ໄປຖືກທາງບໍ່ຫຼົງທາງ ໂອກາດຫຼົງຈະໜ້ອຍລົງ</p>
-                    <p id="detail-p2">ພວກພວກເຮົາຍິນດີໃຫ້ບໍລິການຟຣີ ບໍ່ມີຄ່າໃຊ້ຈ່າຍ ມີລະບົບນຳທາງດ້ວຍສຽງ ແລະ ມີລະບົບກວດຈັບເມື່ອເສັ້ນທາງໃດທີ່ໄປເຖິງໄວກວ່າ ລະບົບຈະປ່ຽນເສັ້ນທາງໂດຍອັດຕະໂນມັດ</p>
+                    <p id="detail-p2">ພວກເຮົາຍິນດີໃຫ້ບໍລິການຟຣີ ບໍ່ມີຄ່າໃຊ້ຈ່າຍ ມີລະບົບນຳທາງດ້ວຍສຽງ ແລະ ມີລະບົບກວດຈັບເມື່ອເສັ້ນທາງໃດທີ່ໄປເຖິງໄວກວ່າ ລະບົບຈະປ່ຽນເສັ້ນທາງໂດຍອັດຕະໂນມັດ</p>
                     
                     <div class="bg-blue-50/60 p-2.5 rounded-xl border border-blue-100 space-y-1.5 mt-2">
                         <div onclick="toggleAnswer()" class="flex items-center space-x-2 text-blue-900 font-bold cursor-pointer hover:text-blue-700 transition">
@@ -334,6 +334,18 @@
                     <button onclick="setPresetAmount(50000)" type="button" class="bg-gray-50 hover:bg-amber-50 hover:border-amber-500 text-gray-700 text-xs font-bold py-1.5 px-2 rounded-xl border border-gray-200 transition">50,000 ₭</button>
                     <button onclick="setPresetAmount(100000)" type="button" class="bg-gray-50 hover:bg-amber-50 hover:border-amber-500 text-gray-700 text-xs font-bold py-1.5 px-2 rounded-xl border border-gray-200 transition">100,000 ₭</button>
                     <button onclick="setPresetAmount(200000)" type="button" class="bg-gray-50 hover:bg-amber-50 hover:border-amber-500 text-gray-700 text-xs font-bold py-1.5 px-2 rounded-xl border border-gray-200 transition">200,000 ₭</button>
+                </div>
+
+                <!-- ⚠️ คำเตือนและคำแนะนำ -->
+                <div class="bg-rose-50 border border-rose-200 rounded-2xl p-3 text-rose-900 text-left space-y-1.5 my-1">
+                    <div class="flex items-center space-x-2 font-bold text-xs text-rose-700">
+                        <i class="fa-solid fa-triangle-exclamation text-sm"></i>
+                        <span id="lbl-warning-title">ຄຳເຕືອນ ແລະ ຄຳແນະນຳ</span>
+                    </div>
+                    <p id="lbl-warning-desc" class="text-[11px] leading-relaxed text-rose-800 space-y-0.5">
+                        <span class="block">• <strong id="lbl-warn-line1">ກະລຸນາຕກວດສອບຍອດເງິນໃຫ້ດີ ກ່ອນສະແກນຈ່າຍ</strong></span>
+                        <span class="block">• <strong id="lbl-warn-line2">ສະໜັບສະໜູນແລ້ວບໍ່ສາມາດຂໍຄືນໄດ້ທຸກກໍລະນີ (Non-refundable).</strong></span>
+                    </p>
                 </div>
 
                 <button onclick="generateQRCode()" id="btn-gen-qr" class="w-full bg-amber-600 hover:bg-amber-700 text-white font-bold py-3 rounded-2xl text-xs transition active:scale-95 shadow-md shadow-amber-600/20 flex items-center justify-center space-x-2 mt-1">
@@ -605,13 +617,16 @@
                 brand: "Bogie Maps", subtitle: "ລະບົບນຳທາງອັດສະລິຍະຕາມເສັ້ນທາງຕົວຈິງ", vehicleTitle: "ເລືອກປະເພດການເດີນທາງ", instruction: "ຄລິກເທິງແຜນທີ່ເພື່ອປັກໝຸດ", car: "ລົດໃຫຍ່", moto: "ລົດຈັກ", bicycle: "ລົດຖີບ", walk: "ຍ່າງ/ແລ່ນ", resultTitle: "ສະຫຼຸບຜົນການນຳທາງຕາມເສັ້ນທາງຕົວຈິງ", currentAddress: "ທີ່ຢູ່ຂອງທ່ານປະຈຸບັນ", distTitle: "ໄລຍະທາງ", timeTitle: "ເວລາເດີນທາງ", arriveTitle: "ເຖິງປະມານ", layerSat: "ດາວທຽມ", layerRoad: "ແຜນທີ່ຖະໜົນ", distUnit: "ກມ.", minUnit: "ນາທີ", hourUnit: "ຊົ່ວໂມງ", dayUnit: "ມື້", testVoiceBtn: "ທົດສອບສຽງ AI", searchPlaceholder: "ຄົ້ນຫາສະຖານທີ່ (ເຊັ່ນ: ປະຕູໄຊ)...", searchBtn: "ຄົ້ນຫາ", suggestionHeader: "ສະຖານທີ່ແນະນຳຍອດນິຍົມ", notFoundPlace: "ບໍ່ພົບສະຖານທີ່",
                 totalRouteSpeech: "เส้นทางที่จะไปทั้งหมด {dist} กิโลเมตร", rerouteSpeech: "ได้เปลี่ยนเส้นทางแล้ว เพื่อความว่องไวในการเดินทาง", testSpeech: "โบกี้เอไอ พร้อมใช้งานแล้วครับ",
                 selectedPlaceDefault: "ກະລຸນາຄລິກປັກໝຸດເທິງແຜນທີ່ ຫຼື ຄົ້ນຫາສະຖານທີ່", selectedPlaceLabel: "ປາຍທາງທີ່ເລືອກ", loadingPlace: "ກຳລັງໂຫຼດຊື່ສະຖານທີ່...",
-                detailTitle: "ລາຍລະອຽດກ່ຽວກັບບໍລິການຂອງພວກເຮົາ", detailP1: "ເວັບໄຊນີ້ສ້າງມາເພື່ອຄົນລາວ ແລະ ຊາວຕ່າງຊາດທີ່ມາທ່ອງທ່ຽວໃນປະເທດລາວ...", detailP2: "ພວກພວກເຮົາຍິນດີໃຫ້ບໍລິການຟຣີ...", detailQaQ: "ແລ້ວທ່ານຮູ້ໄດ້ຈັ່ງໃດວ່າໂອກາດຫຼົງຈະໜ້ອຍລົງ?", detailQaA: "ເພາະວ່າເວັບໄຊນີ້ສ້າງໂດຍຄົນລາວ 100% ຮ່ວມມືກັບບຸກຄົນທີ່ຮູ້ເສັ້ນທາງເປັນຢ່າງດີ", detailCreator: "ເວັບໄຊນີ້ສ້າງໂດຍ <strong>Vathsana Syhalath</strong>", detailContact: "ສະໜັບສະໜູນ ຫຼື ຕິດຕໍ່ສອບຖາມລາຍລະອຽດຕ່າງໆ ໄດ້ທີ່:",
+                detailTitle: "ລາຍລະອຽດກ່ຽວກັບບໍລິການຂອງພວກເຮົາ", detailP1: "ເວັບໄຊນີ້ສ້າງມາເພື່ອຄົນລາວ ແລະ ຊາວຕ່າງຊາດທີ່ມາທ່ອງທ່ຽວໃນປະເທດລາວ...", detailP2: "ພວກເຮົາຍິນດີໃຫ້ບໍລິການຟຣີ...", detailQaQ: "ແລ້ວທ່ານຮູ້ໄດ້ຈັ່ງໃດວ່າໂອກາດຫຼົງຈະໜ້ອຍລົງ?", detailQaA: "ເພາະວ່າເວັບໄຊນີ້ສ້າງໂດຍຄົນລາວ 100% ຮ່ວມມືກັບບຸກຄົນທີ່ຮູ້ເສັ້ນທາງເປັນຢ່າງດີ", detailCreator: "ເວັບໄຊນີ້ສ້າງໂດຍ <strong>Vathsana Syhalath</strong>", detailContact: "ສະໜັບສະໜູນ ຫຼື ຕິດຕໍ່ສອບຖາມລາຍລະອຽດຕ່າງໆ ໄດ້ທີ່:",
                 totalText: "ຈຳນວນເງິນລວມທັງໝົດ:", donateBtnText: "ສະໜັບສະໜູນຄ່າກາເຟ / Donate", successAmountTitle: "ຈຳນວນເງິນ",
                 donateModalTitle: "ສະໜັບສະໜູນພວກເຮົາ", donateModalSub: "ກະລຸນາລະບຸຈຳນວນເງິນ LAK (ຂັ້ນຕໍ່າ 1,000)",
+                warningTitle: "ຄຳເຕືອນ ແລະ ຄຳແນະນຳ",
+                warnLine1: "ກະລຸນາຕກວດສອບຍອດເງິນໃຫ້ດີ ກ່ອນສະແກນຈ່າຍ",
+                warnLine2: "ສະໜັບສະໜູນແລ້ວບໍ່ສາມາດຂໍຄືນໄດ້ທຸກກໍລະນີ (Non-refundable).",
                 scanModalTitle: "ສະແກນເພື່ອສະໜັບສະໜູນ", scanModalSub: "ກະລຸນາສະແກນ QR Code ຜ່ານແອັບທະນາຄານຂອງທ່ານ",
                 genQrText: "ສ້າງຄິວອາໂຄຣ໌ (Generate QR)", qrLoadingText: "ກຳລັງສ້າງຄິວອາໂຄຣ໌...", amountLabel: "ຈຳນວນເງິນ", statusText: "ກຳລັງລໍຖ້າການຊຳລະເງິນ...",
                 expireText: "ຄິວອາໂຄຣ໌ຈະໝົດອາຍຸໃນ",
-                closeBtn: "ປິດໜ້າຕ່າງ", successTitle: "ສຳເລັດສົມບູນ ❤️🙏🏻", successSub: "ການຊຳລະເງິນສຳເລັດສົມບູນແລ້ວ"
+                closeBtn: "ປິດໜ້າຕ່າງ", successTitle: "ຂອບໃຈສຳລັບການສະໜັບສະໜູນພວກເຮົາ ❤️🙏🏻", successSub: "ການຊຳລະເງິນສຳເລັດຮຽບຮ້ອຍແລ້ວ"
             },
             th: {
                 brand: "Bogie Maps", subtitle: "ระบบนำทางอัจฉริยะตามถนนจริง", vehicleTitle: "เลือกรูปแบบการเดินทาง", instruction: "คลิกบนแผนที่เพื่อปักหมุด", car: "รถยนต์", moto: "มอเตอร์ไซค์", bicycle: "จักรยาน", walk: "เดิน/วิ่ง", resultTitle: "สรุปผลการนำทางตามถนนจริง", currentAddress: "ที่อยู่ของคุณปัจจุบัน", distTitle: "ระยะทาง", timeTitle: "เวลาเดินทาง", arriveTitle: "ถึงประมาณ", layerSat: "ดาวเทียม", layerRoad: "แผนที่ถนน", distUnit: "กม.", minUnit: "นาที", hourUnit: "ชั่วโมง", dayUnit: "วัน", testVoiceBtn: "ทดสอบเสียง AI", searchPlaceholder: "ค้นหาสถานที่ (เช่น: ประตูชัย)...", searchBtn: "ค้นหา", suggestionHeader: "สถานที่แนะนำยอดนิยม", notFoundPlace: "ไม่พบสถานที่",
@@ -620,10 +635,13 @@
                 detailTitle: "รายละเอียดเกี่ยวกับบริการของเรา", detailP1: "เว็บไซต์นี้สร้างมาเพื่อคนลาวและชาวต่างชาติ...", detailP2: "พวกเรายินดีให้บริการฟรี...", detailQaQ: "แล้วคุณรู้ได้ไงว่าโอกาสหลงจะน้อยลง?", detailQaA: "เพราะว่าเว็บไซต์นี้สร้างโดยคนลาว 100% ร่วมมือกับบุคคลที่รู้เส้นทางเป็นอย่างดี", detailCreator: "เว็บไซต์นี้สร้างโดย <strong>Vathsana Syhalath</strong>", detailContact: "สนับสนุน หรือติดต่อสอบถามรายละเอียดต่างๆ ได้ที่:",
                 totalText: "จำนวนเงินรวมทั้งหมด:", donateBtnText: "สนับสนุนค่ากาแฟ / Donate", successAmountTitle: "จำนวนเงิน",
                 donateModalTitle: "สนับสนุนพวกเรา", donateModalSub: "กรุณาระบุจำนวนเงิน LAK (ขั้นต่ำ 1,000)",
+                warningTitle: "คำเตือนและคำแนะนำ",
+                warnLine1: "กรุณาตรวจสอบยอดเงินให้ดี ก่อนสแกนจ่าย",
+                warnLine2: "สนับสนุนแล้วไม่สามารถขอคืนได้ทุกกรณี (Non-refundable).",
                 scanModalTitle: "สแกนเพื่อสนับสนุน", scanModalSub: "กรุณาสแกน QR Code ผ่านแอปธนาคารของคุณ",
                 genQrText: "สร้างคิวอาร์โค้ด (Generate QR)", qrLoadingText: "กำลังสร้างคิวอาร์โค้ด...", amountLabel: "จำนวนเงิน", statusText: "กำลังรอการชำระเงิน...",
                 expireText: "คิวอาร์โค้ดจะหมดอายุใน",
-                closeBtn: "ปิดหน้าต่าง", successTitle: "สำเร็จสมบูรณ์ ❤️🙏🏻", successSub: "การชำระเงินสำเร็จสมบูรณ์แล้ว"
+                closeBtn: "ปิดหน้าต่าง", successTitle: "ขอบคุณสำหรับการสนับสนุนพวกเรา ❤️🙏🏻", successSub: "การชำระเงินสำเร็จสมบูรณ์แล้ว"
             },
             en: {
                 brand: "Bogie Maps", subtitle: "Smart Navigation Pro", vehicleTitle: "Select Travel Mode", instruction: "Click on map to set destination", car: "Car", moto: "Moto", bicycle: "Bicycle", walk: "Walking", resultTitle: "Route Summary", currentAddress: "Your Current Location", distTitle: "Distance", timeTitle: "Duration", arriveTitle: "Est. Arrival", layerSat: "Satellite", layerRoad: "Street", distUnit: "km", minUnit: "mins", hourUnit: "hours", dayUnit: "days", testVoiceBtn: "Test AI Voice", searchPlaceholder: "Search location...", searchBtn: "Search", suggestionHeader: "Popular Locations", notFoundPlace: "Location not found",
@@ -632,10 +650,13 @@
                 detailTitle: "Details About Our Services", detailP1: "This website is built for Lao people and foreign tourists...", detailP2: "We are happy to provide free services...", detailQaQ: "How do you know the chance of getting lost will be minimized?", detailQaA: "Because this website is 100% created by Lao locals collaborating with route experts.", detailCreator: "This website was created by <strong>Vathsana Syhalath</strong>", detailContact: "Support or contact for inquiries at:",
                 totalText: "Total Amount:", donateBtnText: "Support Coffee / Donate", successAmountTitle: "Amount",
                 donateModalTitle: "Support Us", donateModalSub: "Please enter amount in LAK (Min 1,000)",
+                warningTitle: "Warnings & Instructions",
+                warnLine1: "Please check the amount carefully before scanning.",
+                warnLine2: "Non-refundable under any circumstances.",
                 scanModalTitle: "Scan to Support", scanModalSub: "Please scan QR Code via your banking app",
                 genQrText: "Generate QR Code", qrLoadingText: "Generating QR Code...", amountLabel: "Amount", statusText: "Waiting for payment...",
                 expireText: "QR Code expires in",
-                closeBtn: "Close Window", successTitle: "Success ❤️🙏🏻", successSub: "Payment completed successfully"
+                closeBtn: "Close Window", successTitle: "Thank you for your support ❤️🙏🏻", successSub: "Payment completed successfully"
             },
             zh: {
                 brand: "Bogie Maps", subtitle: "智能导航系统", vehicleTitle: "选择出行方式", instruction: "点击地图设置目的地", car: "汽车", moto: "摩托车", bicycle: "自行车", walk: "步行", resultTitle: "路线总结", currentAddress: "您的当前位置", distTitle: "距离", timeTitle: "耗时", arriveTitle: "预计到达", layerSat: "卫星地图", layerRoad: "街道地图", distUnit: "公里", minUnit: "分钟", hourUnit: "小时", dayUnit: "天", testVoiceBtn: "测试语音", searchPlaceholder: "搜索地点...", searchBtn: "搜索", suggestionHeader: "热门推荐地点", notFoundPlace: "未找到地点",
@@ -644,10 +665,13 @@
                 detailTitle: "关于我们的服务详情", detailP1: "本网站专为老挝本地人及来老挝旅游...", detailP2: "我们很高兴提供免费服务...", detailQaQ: "你们怎么知道迷路几率会降低？", detailQaA: "因为本网站由老挝本地人100%打造，并与熟悉路线的专家合作开发。", detailCreator: "本网站由 <strong>Vathsana Syhalath</strong> 创建", detailContact: "支持或联系咨询请通过：",
                 totalText: "总金额:", donateBtnText: "支持咖啡 / Donate", successAmountTitle: "金额",
                 donateModalTitle: "支持我们", donateModalSub: "请输入老挝基普金额 (最低 1,000)",
+                warningTitle: "警告与建议",
+                warnLine1: "请在扫码前仔细核对金额。",
+                warnLine2: "一经赞助，概不退款。",
                 scanModalTitle: "扫码支持", scanModalSub: "请使用您的银行应用扫描二维码",
                 genQrText: "生成二维码 (Generate QR)", qrLoadingText: "正在生成二维码...", amountLabel: "金额", statusText: "正在等待支付...",
                 expireText: "二维码将在",
-                closeBtn: "关闭窗口", successTitle: "支付成功 ❤️🙏🏻", successSub: "支付已成功完成"
+                closeBtn: "关闭窗口", successTitle: "感谢您的支持 ❤️🙏🏻", successSub: "支付已成功完成"
             },
             hi: {
                 brand: "Bogie Maps", subtitle: "स्मार्ट नेविगेशन", vehicleTitle: "यात्रा मोड चुनें", instruction: "गंतव्य निर्धारित करने के लिए मानचित्र पर क्लिक करें", car: "कार", moto: "मोटरसाइकिल", bicycle: "साइकिल", walk: "पैदल", resultTitle: "मार्ग सारांश", currentAddress: "आपका वर्तमान स्थान", distTitle: "दूरी", timeTitle: "अवधि", arriveTitle: "अनुमानित आगमन", layerSat: "सैटेलाइट", layerRoad: "सड़क", distUnit: "किमी", minUnit: "मिनट", hourUnit: "घंटे", dayUnit: "दिन", testVoiceBtn: "आवाज परीक्षण", searchPlaceholder: "स्थान खोजें...", searchBtn: "खोज", suggestionHeader: "लोकप्रिय स्थान", notFoundPlace: "स्थान नहीं मिला",
@@ -656,20 +680,17 @@
                 detailTitle: "हमारी सेवाओं के बारे में विवरण", detailP1: "यह वेबसाइट लाओस के लोगों और विदेशी पर्यटकों के लिए बनाई गई है...", detailP2: "हम मुफ्त सेवाएं प्रदान करने में प्रसन्न हैं...", detailQaQ: "आप कैसे जानते हैं कि खो जाने की संभावना कम हो जाएगी?", detailQaA: "क्योंकि यह वेबसाइट 100% लाओ स्थानीय लोगों द्वारा मार्ग विशेषज्ञों के सहयोग से बनाई गई है।", detailCreator: "यह वेबसाइट <strong>Vathsana Syhalath</strong> द्वारा बनाई गई है", detailContact: "समर्थन या पूछताछ के लिए संपर्क करें:",
                 totalText: "कुल राशि:", donateBtnText: "कॉफी का समर्थन करें / Donate", successAmountTitle: "राशि",
                 donateModalTitle: "हमारा समर्थन करें", donateModalSub: "कृपया LAK में राशि दर्ज करें (न्यूनतम 1,000)",
+                warningTitle: "चेतावनी और निर्देश",
+                warnLine1: "कृपया स्कैन करने से पहले राशि की सावधानीपूर्वक जांच करें।",
+                warnLine2: "एक बार भुगतान के बाद राशि वापस नहीं की जाएगी।",
                 scanModalTitle: "समर्थन के लिए स्कैन करें", scanModalSub: "कृपया अपने बैंकिंग ऐप से क्यूआर कोड स्कैन करें",
                 genQrText: "क्यूआर कोड जेनरेट करें", qrLoadingText: "क्यूआर कोड जेनरेट हो रहा है...", amountLabel: "राशि", statusText: "भुगतान की प्रतीक्षा है...",
                 expireText: "क्यूआर कोड समाप्त हो जाएगा",
-                closeBtn: "विंडो बंद करें", successTitle: "सफलता ❤️🙏🏻", successSub: "भुगतान सफलतापूर्वक पूरा हुआ"
+                closeBtn: "विंडो बंद करें", successTitle: "आपके समर्थन के लिए धन्यवाद ❤️🙏🏻", successSub: "भुगतान सफलतापूर्वक पूरा हुआ"
             }
         };
 
-        translations.vi = {
-            ...translations.en,
-            brand: "Bogie Maps", subtitle: "Hệ thống điều hướng thông minh", vehicleTitle: "Chọn phương tiện", instruction: "Nhấp vào bản đồ để chọn điểm đến", car: "Ô tô", moto: "Xe máy", bicycle: "Xe đạp", walk: "Đi bộ", resultTitle: "Tóm tắt tuyến đường", currentAddress: "Vị trí hiện tại", distTitle: "Khoảng cách", timeTitle: "Thời gian", arriveTitle: "Dự kiến đến", layerSat: "Vệ tinh", layerRoad: "Đường phố", distUnit: "km", minUnit: "phút", hourUnit: "giờ", dayUnit: "ngày", testVoiceBtn: "Kiểm tra giọng nói", searchPlaceholder: "Tìm kiếm địa điểm...", searchBtn: "Tìm kiếm", suggestionHeader: "Địa điểm phổ biến", notFoundPlace: "Không tìm thấy địa điểm",
-            totalRouteSpeech: "Tổng khoảng cách tuyến đường là {dist} ki-lô-mét", rerouteSpeech: "Đã cập nhật tuyến đường để di chuyển nhanh hơn.", testSpeech: "Bogie AI đã sẵn sàng.",
-            selectedPlaceDefault: "Vui lòng nhấp vào bản đồ để chọn điểm đến hoặc tìm kiếm", selectedPlaceLabel: "Điểm đến đã chọn", loadingPlace: "Đang tải tên địa điểm..."
-        };
-
+        translations.vi = { ...translations.en };
         translations.ja = { ...translations.en };
         translations.ko = { ...translations.en };
         translations.fr = { ...translations.en };
@@ -819,9 +840,7 @@
             
             const thaiRegex = /[\u0E00-\u0E7F]/;
             const laoRegex = /[\u0E80-\u0EFF]/;
-            const chineseRegex = /[\u4e00-\u9fa5]/;
-            const hindiRegex = /[\u0900-\u097F]/;
-
+            
             let filteredParts = parts.filter(part => {
                 if (lang === 'zh') {
                     return !thaiRegex.test(part) && !laoRegex.test(part);
@@ -904,7 +923,6 @@
             }
         }
 
-        // 🔴 ระบบจัดการเสียงพูด: ถ้าเว็บเป็นภาษาลาว (lo) จะให้อ่านออกเสียงเป็นภาษาไทย (th-TH) ทันที
         function speakSiri(text, priority = false) {
             if (!('speechSynthesis' in window)) return;
             unlockSpeech();
@@ -932,7 +950,7 @@
 
             let langCode = 'th-TH';
             if (currentLang === 'lo') {
-                langCode = 'th-TH'; // 🟢 บังคับให้เว็บภาษาลาว อ่านออกเสียงเป็นภาษาไทย
+                langCode = 'th-TH';
             } else if (currentLang === 'th') {
                 langCode = 'th-TH';
             } else if (currentLang === 'zh') {
@@ -967,7 +985,7 @@
 
             utterance.onend = function() {
                 isSpeaking = false;
-                setTimeout(processSpeechQueue, 200);
+                setTimeout(processSpeechQueue, 150);
             };
 
             utterance.onerror = function() {
@@ -1062,6 +1080,12 @@
 
             document.getElementById('donate-modal-title').innerText = t.donateModalTitle;
             document.getElementById('donate-modal-subtitle').innerText = t.donateModalSub;
+            
+            // อัปเดตข้อความเตือนและคำแนะนำ
+            document.getElementById('lbl-warning-title').innerText = t.warningTitle;
+            document.getElementById('lbl-warn-line1').innerText = t.warnLine1;
+            document.getElementById('lbl-warn-line2').innerText = t.warnLine2;
+
             document.getElementById('lbl-gen-qr-text').innerText = t.genQrText;
             document.getElementById('lbl-qr-loading').innerText = t.qrLoadingText;
             document.getElementById('lbl-amount-label').innerText = t.amountLabel;
